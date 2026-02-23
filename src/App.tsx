@@ -11,6 +11,7 @@ import Favoritos from "./pages/Favoritos";
 import Anotacoes from "./pages/Anotacoes";
 import BancoTemas from "./pages/BancoTemas";
 import ChatTeologico from "./pages/ChatTeologico";
+import Materiais from "./pages/Materiais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/anotacoes" element={<Anotacoes />} />
           <Route path="/temas" element={<BancoTemas />} />
           <Route path="/chat" element={<ChatTeologico />} />
+          <Route path="/materiais" element={<Materiais />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
