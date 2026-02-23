@@ -134,4 +134,56 @@
   .shadow-gold {
     box-shadow: var(--shadow-gold);
   }
+
+  /* Animated floating particles background */
+  @keyframes float-particle {
+    0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.15; }
+    25% { transform: translateY(-30px) translateX(15px) scale(1.1); opacity: 0.25; }
+    50% { transform: translateY(-10px) translateX(-10px) scale(0.95); opacity: 0.2; }
+    75% { transform: translateY(-40px) translateX(5px) scale(1.05); opacity: 0.1; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+
+  .animated-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animated-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(35 90% 50% / 0.06), transparent),
+      radial-gradient(ellipse 500px 500px at 80% 70%, hsl(220 55% 18% / 0.04), transparent),
+      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(35 80% 55% / 0.05), transparent);
+    animation: glow-pulse 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .floating-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: hsl(35 90% 50% / 0.12);
+    animation: float-particle 12s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    background: hsl(var(--card));
+    border-top: 1px solid hsl(var(--border));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

@@ -16,6 +16,9 @@ export const STUDY_TYPES = [
   "Temático (Por Tópicos)",
   "Narrativo (Histórico)",
   "Verso a Verso (Estudo Intensivo)",
+  "Devocional (Reflexivo)",
+  "Apologético (Defesa da Fé)",
+  "Biográfico (Personagens Bíblicos)",
 ];
 
 export const BIBLE_VERSIONS = [
@@ -49,17 +52,21 @@ export const ANALYSIS_OPTIONS: AnalysisOption[] = [
   { id: "estrutura_gramatical", label: "Estrutura gramatical e sintaxe", category: "Análise Textual" },
   { id: "estilo_literario", label: "Estilo Literário (poesia, prosa, parábola)", category: "Análise Textual" },
   { id: "abordagem_devocional", label: "Abordagem Devocional e Espiritual", category: "Análise Textual" },
+  { id: "personagens", label: "Personagens e seus papéis na narrativa", category: "Análise Textual" },
   // Análise Linguística
   { id: "palavras_original", label: "Palavras do Original (Hebraico/Grego)", category: "Análise Linguística" },
   { id: "significado_etimologico", label: "Significado etimológico", category: "Análise Linguística" },
   { id: "palavras_chave", label: "Palavras-chave e seus significados", category: "Análise Linguística" },
   { id: "analise_teologica", label: "Análise Teológica Profunda", category: "Análise Linguística" },
+  { id: "figuras_linguagem", label: "Figuras de linguagem e metáforas", category: "Análise Linguística" },
   // Conexões Bíblicas
   { id: "referencias_cruzadas", label: "Referências Cruzadas", category: "Conexões Bíblicas" },
   { id: "ligacao_lei", label: "Ligação com a Lei (Pentateuco)", category: "Conexões Bíblicas" },
   { id: "ligacao_profetas", label: "Ligação com os Profetas", category: "Conexões Bíblicas" },
   { id: "ligacao_evangelhos", label: "Ligação com os Evangelhos", category: "Conexões Bíblicas" },
   { id: "ligacao_epistolas", label: "Ligação com as Epístolas", category: "Conexões Bíblicas" },
+  { id: "contexto_hist_profetico", label: "Contexto Histórico Profético", category: "Conexões Bíblicas" },
+  { id: "conexao_escatologica", label: "Conexão Escatológica", category: "Conexões Bíblicas" },
   { id: "paralelos_at_nt", label: "Paralelos no Antigo/Novo Testamento", category: "Conexões Bíblicas" },
   { id: "conexoes_tradicao", label: "Conexões com a tradição da época", category: "Conexões Bíblicas" },
   // Análise Contextual Profunda
@@ -67,15 +74,24 @@ export const ANALYSIS_OPTIONS: AnalysisOption[] = [
   { id: "contexto_escatologico", label: "Contexto Escatológico (últimos dias, apocalíptico)", category: "Análise Contextual Profunda" },
   { id: "provas_arqueologicas", label: "Provas Arqueológicas e Achados", category: "Análise Contextual Profunda" },
   { id: "periodo_historico", label: "Período Histórico do Acontecimento", category: "Análise Contextual Profunda" },
+  { id: "costumes_sociais", label: "Costumes sociais e religiosos da época", category: "Análise Contextual Profunda" },
+  { id: "influencias_culturais", label: "Influências culturais (grega, romana, egípcia)", category: "Análise Contextual Profunda" },
   // Aplicação Prática
   { id: "aplicacao_moderna", label: "Aplicação ao contexto moderno", category: "Aplicação Prática" },
+  { id: "paralelo_novo_antigo", label: "Paralelo no Novo e no Antigo Testamento", category: "Aplicação Prática" },
   { id: "verdades_eternas", label: "Verdades eternas do texto", category: "Aplicação Prática" },
   { id: "desafios_praticos", label: "Desafios práticos e comportamentais", category: "Aplicação Prática" },
-  // Extras (diferenciais)
+  { id: "aplicacao_familiar", label: "Aplicação para vida familiar e conjugal", category: "Aplicação Prática" },
+  { id: "aplicacao_lideranca", label: "Aplicação para liderança pastoral", category: "Aplicação Prática" },
+  // Extras Exclusivos
   { id: "ilustracoes", label: "Sugestões de Ilustrações e Histórias", category: "Extras Exclusivos ✨" },
   { id: "perguntas_reflexao", label: "Perguntas de Reflexão para a Igreja", category: "Extras Exclusivos ✨" },
   { id: "plano_slides", label: "Sugestão de Estrutura para Slides", category: "Extras Exclusivos ✨" },
   { id: "oracoes", label: "Orações Sugeridas (abertura e encerramento)", category: "Extras Exclusivos ✨" },
+  { id: "dinamicas_grupo", label: "Dinâmicas de grupo para estudo bíblico", category: "Extras Exclusivos ✨" },
+  { id: "mapa_mental", label: "Mapa mental do texto", category: "Extras Exclusivos ✨" },
+  { id: "resumo_podcast", label: "Resumo para podcast ou redes sociais", category: "Extras Exclusivos ✨" },
+  { id: "devocional_semanal", label: "Devocional semanal baseado no texto", category: "Extras Exclusivos ✨" },
 ];
 
 export const CATEGORY_ICONS: Record<string, string> = {
