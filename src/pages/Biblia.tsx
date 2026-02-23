@@ -1,20 +1,33 @@
-import { useState } from "react";
-import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2, Heart } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BIBLE_BOOKS, BIBLE_VERSIONS } from "@/lib/sermon-data";
 import { BIBLE_CHAPTER_COUNT } from "@/lib/bible-chapters";
+import { saveReadingState } from "@/components/ContinueReading";
 import BottomNav from "@/components/BottomNav";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/theology-chat`;
 
 export default function Biblia() {
+  const [searchParams] = useSearchParams();
   const [version, setVersion] = useState(BIBLE_VERSIONS[0]);
   const [search, setSearch] = useState("");
-  const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
+  const [selectedBook, setSelectedBook] = useState<string | null>(searchParams.get("book"));
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(
+    searchParams.get("chapter") ? Number(searchParams.get("chapter")) : null
+  );
   const [chapterContent, setChapterContent] = useState("");
   const [loadingChapter, setLoadingChapter] = useState(false);
+
+  // Auto-load chapter from URL params
+  useEffect(() => {
+    const book = searchParams.get("book");
+    const chapter = searchParams.get("chapter");
+    if (book && chapter && !chapterContent && !loadingChapter) {
+      loadChapter(book, Number(chapter));
+    }
+  }, []);
 
   const atBooks = BIBLE_BOOKS.slice(0, 39);
   const ntBooks = BIBLE_BOOKS.slice(39);
@@ -26,6 +39,7 @@ export default function Biblia() {
     setSelectedChapter(chapter);
     setChapterContent("");
     setLoadingChapter(true);
+    saveReadingState(book, chapter, version);
 
     try {
       const resp = await fetch(CHAT_URL, {
@@ -38,7 +52,7 @@ export default function Biblia() {
           messages: [
             {
               role: "user",
-              content: `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários.`,
+              content: `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`,
             },
           ],
         }),
@@ -140,7 +154,7 @@ export default function Biblia() {
                   </div>
                 )}
                 <div className="text-sm font-body text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                  {chapterContent}
+                  {chapterContent.replace(/\*\*/g, "").replace(/\*/g, "")}
                 </div>
               </div>
             </motion.div>
