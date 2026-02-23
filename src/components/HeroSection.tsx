@@ -1,20 +1,21 @@
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroBg from "@/assets/hero-bible.jpg";
+import heroVideo from "@/assets/hero-bible-video.mp4";
 
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden rounded-2xl mb-8">
       <div className="absolute inset-0">
-        <img
-          src={heroBg}
-          alt="Bíblia aberta com luz dourada"
+        <video
+          src={heroVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
           className="w-full h-full object-cover"
-          loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/80 to-primary/70" />
-        {/* Animated shimmer overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/75 to-secondary/60" />
         <div
           className="absolute inset-0 opacity-20"
           style={{
