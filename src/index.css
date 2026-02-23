@@ -154,9 +154,9 @@
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(220 60% 30% / 0.15), transparent),
-      radial-gradient(ellipse 500px 500px at 80% 70%, hsl(0 72% 51% / 0.12), transparent),
-      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(220 50% 35% / 0.1), transparent);
+      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(220 60% 30% / 0.2), transparent),
+      radial-gradient(ellipse 500px 500px at 80% 70%, hsl(210 70% 25% / 0.18), transparent),
+      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(230 55% 35% / 0.15), transparent);
     animation: glow-pulse 6s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
