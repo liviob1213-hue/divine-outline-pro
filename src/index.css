@@ -18,7 +18,7 @@
     --primary: 0 0% 23%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 72% 51%;
+    --secondary: 220 60% 30%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 20%;
@@ -27,28 +27,28 @@
     --accent: 210 40% 96.0784%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 22%;
     --input: 0 0% 22%;
-    --ring: 25 95% 53%;
+    --ring: 220 60% 30%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary: 220 60% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-ring: 220 60% 30%;
 
     /* Custom tokens */
-    --gold: 25 95% 53%;
-    --gold-light: 30 90% 65%;
-    --gold-dark: 20 90% 42%;
+    --gold: 220 60% 30%;
+    --gold-light: 215 50% 45%;
+    --gold-dark: 225 65% 22%;
     --navy: 0 0% 10%;
     --navy-light: 0 0% 25%;
     --navy-deep: 0 0% 6%;
@@ -56,16 +56,16 @@
     --cream-dark: 0 0% 85%;
 
     --gradient-hero: linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 6%));
-    --gradient-gold: linear-gradient(135deg, hsl(25 95% 53%), hsl(20 90% 42%));
-    --gradient-card-warm: linear-gradient(145deg, hsl(25 95% 53%), hsl(20 90% 42%));
-    --gradient-card-blue: linear-gradient(145deg, hsl(0 0% 22%), hsl(0 0% 14%));
+    --gradient-gold: linear-gradient(135deg, hsl(220 60% 30%), hsl(225 65% 22%));
+    --gradient-card-warm: linear-gradient(145deg, hsl(220 60% 30%), hsl(225 65% 22%));
+    --gradient-card-blue: linear-gradient(145deg, hsl(220 55% 25%), hsl(225 60% 18%));
     --gradient-card-purple: linear-gradient(145deg, hsl(0 72% 51%), hsl(350 65% 40%));
-    --gradient-card-red: linear-gradient(145deg, hsl(0 84% 55%), hsl(350 75% 42%));
-    --gradient-card-green: linear-gradient(145deg, hsl(25 85% 48%), hsl(30 80% 38%));
+    --gradient-card-red: linear-gradient(145deg, hsl(0 72% 51%), hsl(350 65% 40%));
+    --gradient-card-green: linear-gradient(145deg, hsl(220 50% 35%), hsl(215 55% 28%));
 
     --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 8px 30px -4px hsl(25 95% 53% / 0.2);
-    --shadow-gold: 0 4px 20px -4px hsl(25 95% 53% / 0.4);
+    --shadow-card-hover: 0 8px 30px -4px hsl(220 60% 30% / 0.2);
+    --shadow-gold: 0 4px 20px -4px hsl(220 60% 30% / 0.4);
 
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'Inter', system-ui, sans-serif;
@@ -154,9 +154,9 @@
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(25 95% 53% / 0.15), transparent),
+      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(220 60% 30% / 0.15), transparent),
       radial-gradient(ellipse 500px 500px at 80% 70%, hsl(0 72% 51% / 0.12), transparent),
-      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(25 90% 50% / 0.1), transparent);
+      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(220 50% 35% / 0.1), transparent);
     animation: glow-pulse 6s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
@@ -178,7 +178,7 @@
   .floating-particle {
     position: absolute;
     border-radius: 50%;
-    background: hsl(25 95% 53% / 0.12);
+    background: hsl(220 60% 30% / 0.12);
     animation: float-particle 12s ease-in-out infinite;
     pointer-events: none;
   }
