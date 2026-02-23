@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle } from "lucide-react";
+import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -58,6 +58,15 @@ const tools = [
     gradient: "from-destructive to-secondary",
     link: "/temas",
     badge: "Exclusivo",
+    span: "col-span-2",
+  },
+  {
+    title: "Materiais do Pastor",
+    description: "Anotações, imagens e vídeos salvos",
+    icon: FolderOpen,
+    gradient: "from-navy to-navy-deep",
+    link: "/materiais",
+    badge: "Novo",
     span: "col-span-2",
   },
 ];
