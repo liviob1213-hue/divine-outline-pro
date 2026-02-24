@@ -8,6 +8,7 @@ import { saveReadingState } from "@/components/ContinueReading";
 import BottomNav from "@/components/BottomNav";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/theology-chat`;
+const BIBLE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bible-lookup`;
 
 const VERSIONS_WITH_HEBREW = [
   ...BIBLE_VERSIONS,
@@ -52,6 +53,36 @@ export default function Biblia() {
     saveReadingState(book, chapter, version);
 
     const isHebrew = version === "Bíblia Hebraica (Tanakh)";
+
+    // Try DB first (skip for Hebrew version which has no DB data)
+    if (!isHebrew) {
+      try {
+        const dbResp = await fetch(BIBLE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ book, chapter, version }),
+        });
+
+        if (dbResp.ok) {
+          const dbData = await dbResp.json();
+          if (dbData.source === "db" && dbData.verses?.length > 0) {
+            const text = dbData.verses
+              .map((v: { versiculo: number; texto: string }) => `${v.versiculo} ${v.texto}`)
+              .join("\n");
+            setChapterContent(text);
+            setLoadingChapter(false);
+            return;
+          }
+        }
+      } catch {
+        // DB failed, fall through to AI
+      }
+    }
+
+    // Fallback: use AI
     const prompt = isHebrew
       ? `Mostre o texto de ${book} capítulo ${chapter} em hebraico com transliteração e tradução literal. Formato: cada versículo com o texto hebraico, transliteração e tradução. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`
       : `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`;

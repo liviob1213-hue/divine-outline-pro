@@ -1,1 +1,13 @@
 project_id = "engfptrseivrukcgknrt"
+
+[functions.theology-chat]
+verify_jwt = false
+
+[functions.seed-hinos]
+verify_jwt = false
+
+[functions.search-hinos]
+verify_jwt = false
+
+[functions.bible-lookup]
+verify_jwt = false
