@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.bible-lookup]
 verify_jwt = false
+
+[functions.get-all-hinos]
+verify_jwt = false
