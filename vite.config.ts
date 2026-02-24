@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.ico", "robots.txt"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,mp4,woff2}"],
         runtimeCaching: [
           {
