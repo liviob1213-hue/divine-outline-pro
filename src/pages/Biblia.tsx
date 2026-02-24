@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2, Heart } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2, Languages } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BIBLE_BOOKS, BIBLE_VERSIONS } from "@/lib/sermon-data";
@@ -9,9 +9,14 @@ import BottomNav from "@/components/BottomNav";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/theology-chat`;
 
+const VERSIONS_WITH_HEBREW = [
+  ...BIBLE_VERSIONS,
+  "Bíblia Hebraica (Tanakh)",
+];
+
 export default function Biblia() {
   const [searchParams] = useSearchParams();
-  const [version, setVersion] = useState(BIBLE_VERSIONS[0]);
+  const [version, setVersion] = useState(VERSIONS_WITH_HEBREW[0]);
   const [search, setSearch] = useState("");
   const [selectedBook, setSelectedBook] = useState<string | null>(searchParams.get("book"));
   const [selectedChapter, setSelectedChapter] = useState<number | null>(
@@ -20,7 +25,12 @@ export default function Biblia() {
   const [chapterContent, setChapterContent] = useState("");
   const [loadingChapter, setLoadingChapter] = useState(false);
 
-  // Auto-load chapter from URL params
+  // Word context popup
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [wordContext, setWordContext] = useState("");
+  const [loadingWord, setLoadingWord] = useState(false);
+  const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(null);
+
   useEffect(() => {
     const book = searchParams.get("book");
     const chapter = searchParams.get("chapter");
@@ -41,6 +51,11 @@ export default function Biblia() {
     setLoadingChapter(true);
     saveReadingState(book, chapter, version);
 
+    const isHebrew = version === "Bíblia Hebraica (Tanakh)";
+    const prompt = isHebrew
+      ? `Mostre o texto de ${book} capítulo ${chapter} em hebraico com transliteração e tradução literal. Formato: cada versículo com o texto hebraico, transliteração e tradução. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`
+      : `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`;
+
     try {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
@@ -48,14 +63,7 @@ export default function Biblia() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`,
-            },
-          ],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
       });
 
       if (!resp.ok || !resp.body) throw new Error("Erro");
@@ -97,6 +105,78 @@ export default function Biblia() {
     }
   };
 
+  const handleTextSelection = useCallback(() => {
+    const selection = window.getSelection();
+    const text = selection?.toString().trim();
+    if (text && text.length > 1 && text.length < 60) {
+      const range = selection?.getRangeAt(0);
+      const rect = range?.getBoundingClientRect();
+      if (rect) {
+        setSelectedWord(text);
+        setPopupPos({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+        setWordContext("");
+      }
+    }
+  }, []);
+
+  const explainWord = async (mode: "translate" | "context") => {
+    if (!selectedWord) return;
+    setLoadingWord(true);
+    setWordContext("");
+
+    const prompt = mode === "translate"
+      ? `Traduza a palavra/expressão "${selectedWord}" para hebraico. Forneça: 1) A palavra em hebraico 2) Transliteração 3) Significado literal 4) Uso bíblico. Seja breve e direto.`
+      : `Explique a palavra/expressão bíblica "${selectedWord}" no contexto de ${selectedBook} ${selectedChapter}. Forneça: 1) Significado original 2) Contexto cultural/histórico 3) Aplicação teológica. Seja breve.`;
+
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+      });
+
+      if (!resp.ok || !resp.body) throw new Error("Erro");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let content = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(json);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              content += delta;
+              setWordContext(content);
+            }
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
+    } catch {
+      setWordContext("Erro ao buscar informações.");
+    } finally {
+      setLoadingWord(false);
+    }
+  };
+
   const chapterCount = selectedBook ? BIBLE_CHAPTER_COUNT[selectedBook] || 0 : 0;
 
   return (
@@ -123,7 +203,7 @@ export default function Biblia() {
               onChange={(e) => setVersion(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-input bg-card text-sm font-body text-foreground focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
             >
-              {BIBLE_VERSIONS.map((v) => (
+              {VERSIONS_WITH_HEBREW.map((v) => (
                 <option key={v} value={v}>{v}</option>
               ))}
             </select>
@@ -133,15 +213,24 @@ export default function Biblia() {
 
         <AnimatePresence mode="wait">
           {selectedChapter !== null && selectedBook ? (
-            /* Chapter reading view */
             <motion.div key="chapter-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               <button
-                onClick={() => { setSelectedChapter(null); setChapterContent(""); }}
-                className="flex items-center gap-1 text-sm text-primary font-body font-semibold mb-4 hover:underline"
+                onClick={() => { setSelectedChapter(null); setChapterContent(""); setSelectedWord(null); }}
+                className="flex items-center gap-1 text-sm font-body font-semibold mb-4 hover:underline"
+                style={{ color: "hsl(262 70% 60%)" }}
               >
                 <ChevronLeft className="w-4 h-4" />
                 {selectedBook} — Capítulos
               </button>
+
+              {/* Tip for word selection */}
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl bg-card border border-border">
+                <Languages className="w-4 h-4 text-pink-400 flex-shrink-0" />
+                <p className="text-[10px] text-muted-foreground font-body">
+                  Selecione qualquer palavra para traduzir para hebraico ou obter contexto bíblico
+                </p>
+              </div>
+
               <div className="bg-card rounded-2xl p-6 border border-border shadow-card">
                 <h3 className="font-display text-lg font-bold mb-1 text-foreground">
                   {selectedBook} {selectedChapter}
@@ -153,17 +242,74 @@ export default function Biblia() {
                     <span className="text-sm font-body">Carregando capítulo...</span>
                   </div>
                 )}
-                <div className="text-sm font-body text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                <div
+                  className="text-sm font-body text-foreground/90 leading-relaxed whitespace-pre-wrap"
+                  onMouseUp={handleTextSelection}
+                  onTouchEnd={handleTextSelection}
+                >
                   {chapterContent.replace(/\*\*/g, "").replace(/\*/g, "")}
                 </div>
               </div>
+
+              {/* Word popup */}
+              <AnimatePresence>
+                {selectedWord && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="fixed inset-x-4 bottom-24 z-50 max-w-lg mx-auto"
+                  >
+                    <div className="bg-card rounded-2xl p-4 border border-border shadow-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-body text-muted-foreground">
+                          Palavra: <span className="font-bold text-foreground">"{selectedWord}"</span>
+                        </p>
+                        <button onClick={() => { setSelectedWord(null); setWordContext(""); }} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+                      </div>
+
+                      {!wordContext && !loadingWord && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => explainWord("translate")}
+                            className="flex-1 py-2 rounded-xl text-xs font-body font-semibold text-white"
+                            style={{ background: "var(--gradient-card-pink)" }}
+                          >
+                            🔤 Traduzir p/ Hebraico
+                          </button>
+                          <button
+                            onClick={() => explainWord("context")}
+                            className="flex-1 py-2 rounded-xl text-xs font-body font-semibold text-white"
+                            style={{ background: "var(--gradient-card-purple)" }}
+                          >
+                            📖 Contexto e Explicação
+                          </button>
+                        </div>
+                      )}
+
+                      {loadingWord && !wordContext && (
+                        <div className="flex items-center gap-2 text-muted-foreground py-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-xs font-body">Analisando...</span>
+                        </div>
+                      )}
+
+                      {wordContext && (
+                        <div className="text-xs font-body text-foreground/90 leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
+                          {wordContext.replace(/\*\*/g, "").replace(/\*/g, "")}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ) : selectedBook ? (
-            /* Chapter selection grid */
             <motion.div key="chapters" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               <button
                 onClick={() => setSelectedBook(null)}
-                className="flex items-center gap-1 text-sm text-primary font-body font-semibold mb-4 hover:underline"
+                className="flex items-center gap-1 text-sm font-body font-semibold mb-4 hover:underline"
+                style={{ color: "hsl(262 70% 60%)" }}
               >
                 <ChevronLeft className="w-4 h-4" />
                 Livros
@@ -175,7 +321,10 @@ export default function Biblia() {
                   <button
                     key={ch}
                     onClick={() => loadChapter(selectedBook, ch)}
-                    className="aspect-square rounded-xl bg-card border border-border text-sm font-body font-semibold text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all flex items-center justify-center"
+                    className="aspect-square rounded-xl bg-card border border-border text-sm font-body font-semibold text-foreground hover:text-white hover:border-transparent transition-all flex items-center justify-center"
+                    style={{ ["--tw-hover-bg" as string]: "hsl(262 70% 50%)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(262 70% 50%)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = ""; }}
                   >
                     {ch}
                   </button>
@@ -183,9 +332,7 @@ export default function Biblia() {
               </div>
             </motion.div>
           ) : (
-            /* Book selection */
             <motion.div key="books" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              {/* Search */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
@@ -197,7 +344,6 @@ export default function Biblia() {
                 />
               </motion.div>
 
-              {/* AT */}
               <section>
                 <h2 className="text-xs font-body font-bold uppercase tracking-widest text-muted-foreground mb-3">
                   📜 Antigo Testamento
@@ -215,7 +361,6 @@ export default function Biblia() {
                 </div>
               </section>
 
-              {/* NT */}
               <section>
                 <h2 className="text-xs font-body font-bold uppercase tracking-widest text-muted-foreground mb-3">
                   ✝️ Novo Testamento

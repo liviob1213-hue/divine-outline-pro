@@ -12,6 +12,8 @@ import Anotacoes from "./pages/Anotacoes";
 import BancoTemas from "./pages/BancoTemas";
 import ChatTeologico from "./pages/ChatTeologico";
 import Materiais from "./pages/Materiais";
+import DicionarioBiblico from "./pages/DicionarioBiblico";
+import EnciclopediaJudaica from "./pages/EnciclopediaJudaica";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
           <Route path="/temas" element={<BancoTemas />} />
           <Route path="/chat" element={<ChatTeologico />} />
           <Route path="/materiais" element={<Materiais />} />
+          <Route path="/dicionario" element={<DicionarioBiblico />} />
+          <Route path="/enciclopedia" element={<EnciclopediaJudaica />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
