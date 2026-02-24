@@ -33,31 +33,44 @@ export default function ContinueReading() {
     setReading(getReadingState());
   }, []);
 
-  if (!reading) return null;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="mb-6"
     >
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-5 rounded-full" style={{ background: "var(--gradient-gold)" }} />
+        <h2 className="text-xs font-semibold font-body tracking-widest uppercase text-muted-foreground">
+          Continuar Leitura
+        </h2>
+      </div>
       <Link
-        to={`/biblia?book=${encodeURIComponent(reading.book)}&chapter=${reading.chapter}`}
+        to={reading ? `/biblia?book=${encodeURIComponent(reading.book)}&chapter=${reading.chapter}` : "/biblia"}
         className="flex items-center gap-4 bg-card rounded-2xl p-4 border border-border shadow-card hover:shadow-card-hover transition-all group"
       >
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-destructive flex items-center justify-center flex-shrink-0">
-          <BookOpen className="w-5 h-5 text-primary-foreground" />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--gradient-card-purple)" }}>
+          <BookOpen className="w-5 h-5 text-purple-200" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-widest font-body font-semibold text-muted-foreground mb-0.5">
-            Continuar leitura
+          {reading ? (
+            <>
+              <p className="text-sm font-display font-bold text-foreground truncate">
+                {reading.book} {reading.chapter}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-body">{reading.version}</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-display font-bold text-foreground">Comece sua leitura</p>
+              <p className="text-[10px] text-muted-foreground font-body">Escolha um livro para continuar</p>
+            </>
+          )}
+          <p className="text-[11px] font-body font-semibold mt-1" style={{ color: "hsl(262 70% 60%)" }}>
+            Retomar leitura →
           </p>
-          <p className="text-sm font-display font-bold text-foreground truncate">
-            {reading.book} {reading.chapter}
-          </p>
-          <p className="text-[10px] text-muted-foreground font-body">{reading.version}</p>
         </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        <BookOpen className="w-8 h-8 opacity-20 text-foreground" />
       </Link>
     </motion.div>
   );

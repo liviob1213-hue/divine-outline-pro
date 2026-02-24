@@ -6,66 +6,84 @@
 
 @layer base {
   :root {
-    --background: 0 0% 13%;
+    --background: 240 10% 6%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 17%;
+    --card: 240 8% 12%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 17%;
+    --popover: 240 8% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 0 0% 23%;
+    --primary: 262 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 60% 30%;
+    --secondary: 262 60% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 240 6% 16%;
+    --muted-foreground: 240 5% 55%;
 
-    --accent: 210 40% 96.0784%;
+    --accent: 262 70% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 22%;
-    --input: 0 0% 22%;
-    --ring: 220 60% 30%;
+    --border: 240 6% 18%;
+    --input: 240 6% 18%;
+    --ring: 262 70% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 10%;
+    --sidebar-background: 240 10% 5%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 220 60% 30%;
+    --sidebar-primary: 262 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent: 240 8% 14%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 220 60% 30%;
+    --sidebar-border: 240 6% 16%;
+    --sidebar-ring: 262 70% 50%;
 
-    /* Custom tokens */
-    --gold: 220 60% 30%;
-    --gold-light: 215 50% 45%;
-    --gold-dark: 225 65% 22%;
-    --navy: 0 0% 10%;
-    --navy-light: 0 0% 25%;
-    --navy-deep: 0 0% 6%;
+    /* Custom tokens - Vibrant palette */
+    --gold: 45 100% 55%;
+    --gold-light: 45 95% 65%;
+    --gold-dark: 45 100% 45%;
+
+    --purple: 262 70% 50%;
+    --purple-light: 262 60% 60%;
+    --purple-dark: 262 75% 35%;
+
+    --orange: 25 95% 53%;
+    --orange-light: 25 90% 60%;
+
+    --pink: 330 80% 55%;
+    --pink-light: 330 70% 65%;
+
+    --red: 0 72% 51%;
+    --red-light: 0 65% 60%;
+
+    --amber: 35 95% 50%;
+    --amber-light: 35 90% 60%;
+
+    --navy: 240 10% 8%;
+    --navy-light: 240 8% 20%;
+    --navy-deep: 240 12% 4%;
     --cream: 0 0% 95%;
     --cream-dark: 0 0% 85%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 10%), hsl(0 0% 6%));
-    --gradient-gold: linear-gradient(135deg, hsl(220 60% 30%), hsl(225 65% 22%));
-    --gradient-card-warm: linear-gradient(145deg, hsl(220 60% 30%), hsl(225 65% 22%));
-    --gradient-card-blue: linear-gradient(145deg, hsl(220 55% 25%), hsl(225 60% 18%));
-    --gradient-card-purple: linear-gradient(145deg, hsl(0 72% 51%), hsl(350 65% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(262 70% 50%), hsl(262 75% 35%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 55%), hsl(35 95% 50%));
+    --gradient-card-warm: linear-gradient(145deg, hsl(25 95% 53%), hsl(35 95% 50%));
+    --gradient-card-purple: linear-gradient(145deg, hsl(262 70% 50%), hsl(262 75% 35%));
     --gradient-card-red: linear-gradient(145deg, hsl(0 72% 51%), hsl(350 65% 40%));
-    --gradient-card-green: linear-gradient(145deg, hsl(220 50% 35%), hsl(215 55% 28%));
+    --gradient-card-pink: linear-gradient(145deg, hsl(330 80% 55%), hsl(280 60% 45%));
+    --gradient-card-amber: linear-gradient(145deg, hsl(35 95% 50%), hsl(25 90% 45%));
+    --gradient-card-green: linear-gradient(145deg, hsl(160 60% 40%), hsl(170 55% 30%));
 
     --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 8px 30px -4px hsl(220 60% 30% / 0.2);
-    --shadow-gold: 0 4px 20px -4px hsl(220 60% 30% / 0.4);
+    --shadow-card-hover: 0 8px 30px -4px hsl(262 70% 50% / 0.2);
+    --shadow-gold: 0 4px 20px -4px hsl(45 100% 55% / 0.4);
 
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'Inter', system-ui, sans-serif;
@@ -154,9 +172,9 @@
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(220 60% 30% / 0.2), transparent),
-      radial-gradient(ellipse 500px 500px at 80% 70%, hsl(210 70% 25% / 0.18), transparent),
-      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(230 55% 35% / 0.15), transparent);
+      radial-gradient(ellipse 600px 400px at 20% 30%, hsl(262 70% 50% / 0.12), transparent),
+      radial-gradient(ellipse 500px 500px at 80% 70%, hsl(330 80% 55% / 0.08), transparent),
+      radial-gradient(ellipse 300px 300px at 60% 20%, hsl(25 95% 53% / 0.08), transparent);
     animation: glow-pulse 6s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
@@ -178,7 +196,7 @@
   .floating-particle {
     position: absolute;
     border-radius: 50%;
-    background: hsl(220 60% 30% / 0.12);
+    background: hsl(262 70% 50% / 0.12);
     animation: float-particle 12s ease-in-out infinite;
     pointer-events: none;
   }

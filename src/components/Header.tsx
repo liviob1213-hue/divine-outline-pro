@@ -5,8 +5,8 @@ export default function Header() {
   return (
     <header className="flex items-center justify-between py-4">
       <Link to="/" className="flex items-center gap-2">
-        <div className="w-9 h-9 bg-gradient-gold rounded-lg flex items-center justify-center shadow-gold">
-          <BookOpen className="w-5 h-5 text-primary" />
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center shadow-gold" style={{ background: "var(--gradient-gold)" }}>
+          <BookOpen className="w-5 h-5 text-white" />
         </div>
         <span className="font-display font-bold text-lg text-foreground">
           PregAI

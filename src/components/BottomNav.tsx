@@ -2,11 +2,11 @@ import { BookOpen, Sparkles, Music, MessageCircle, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
-  { icon: Home, label: "Início", path: "/" },
-  { icon: BookOpen, label: "Bíblia", path: "/biblia" },
-  { icon: Sparkles, label: "Esboço", path: "/criar-esboco" },
-  { icon: Music, label: "Harpa", path: "/harpa" },
-  { icon: MessageCircle, label: "Chat IA", path: "/chat" },
+  { icon: Home, label: "Início", path: "/", activeColor: "text-purple-400" },
+  { icon: BookOpen, label: "Bíblia", path: "/biblia", activeColor: "text-purple-400" },
+  { icon: Sparkles, label: "Esboço", path: "/criar-esboco", activeColor: "text-yellow-400" },
+  { icon: Music, label: "Harpa", path: "/harpa", activeColor: "text-red-400" },
+  { icon: MessageCircle, label: "Chat IA", path: "/chat", activeColor: "text-cyan-400" },
 ];
 
 export default function BottomNav() {
@@ -23,7 +23,7 @@ export default function BottomNav() {
               to={item.path}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
                 isActive
-                  ? "text-secondary"
+                  ? item.activeColor
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
