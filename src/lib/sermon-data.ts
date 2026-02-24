@@ -22,19 +22,19 @@ export const STUDY_TYPES = [
 ];
 
 export const BIBLE_VERSIONS = [
+  "Almeida Corrigida e Fiel (ACF)",
   "Almeida Revisada e Atualizada (ARA)",
   "Almeida Revisada e Corrigida (ARC)",
-  "Almeida Revisada Corrigida (ACF)",
+  "Almeida Século XXI (AS21)",
+  "Almeida Atualizada (JFAA)",
+  "King James Atualizada (KJA)",
+  "King James Fiel (KJF)",
   "Nova Almeida Atualizada (NAA)",
+  "Nova Bíblia Viva (NBV)",
   "Nova Tradução na Linguagem de Hoje (NTLH)",
   "Nova Versão Internacional (NVI)",
   "Nova Versão Transformadora (NVT)",
-  "Almeida Antiga (AA)",
-  "Almeida Recebida (AR)",
-  "King James Version (KJV)",
-  "Basic English Bible (BEB)",
-  "New International Version (NIV)",
-  "American Standard Version (ASV)",
+  "Tradução Brasileira (TB)",
 ];
 
 export interface AnalysisOption {
