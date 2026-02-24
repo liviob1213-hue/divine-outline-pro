@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      biblias: {
+        Row: {
+          capitulo: number
+          id: number
+          livro_id: number
+          texto: string
+          versao: string
+          versiculo: number
+        }
+        Insert: {
+          capitulo: number
+          id?: number
+          livro_id: number
+          texto: string
+          versao: string
+          versiculo: number
+        }
+        Update: {
+          capitulo?: number
+          id?: number
+          livro_id?: number
+          texto?: string
+          versao?: string
+          versiculo?: number
+        }
+        Relationships: []
+      }
+      hinos: {
+        Row: {
+          coro: string | null
+          id: number
+          letra_completa: string
+          search_vector: unknown
+          titulo: string
+        }
+        Insert: {
+          coro?: string | null
+          id: number
+          letra_completa: string
+          search_vector?: unknown
+          titulo: string
+        }
+        Update: {
+          coro?: string | null
+          id?: number
+          letra_completa?: string
+          search_vector?: unknown
+          titulo?: string
+        }
+        Relationships: []
+      }
+      livros_biblia: {
+        Row: {
+          id: number
+          nome: string
+          testamento: string
+        }
+        Insert: {
+          id: number
+          nome: string
+          testamento: string
+        }
+        Update: {
+          id?: number
+          nome?: string
+          testamento?: string
+        }
+        Relationships: []
+      }
       pastor_materials: {
         Row: {
           content: string | null
