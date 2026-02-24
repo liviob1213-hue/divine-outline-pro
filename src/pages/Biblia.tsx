@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2, Languages } from "lucide-react";
+import { ArrowLeft, Search, ChevronDown, ChevronLeft, Loader2, Languages, WifiOff } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BIBLE_BOOKS, BIBLE_VERSIONS } from "@/lib/sermon-data";
 import { BIBLE_CHAPTER_COUNT } from "@/lib/bible-chapters";
 import { saveReadingState } from "@/components/ContinueReading";
+import { cacheBibleChapter, getCachedBibleChapter, isOnline, onNetworkChange } from "@/lib/offline-cache";
 import BottomNav from "@/components/BottomNav";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/theology-chat`;
@@ -31,6 +32,11 @@ export default function Biblia() {
   const [wordContext, setWordContext] = useState("");
   const [loadingWord, setLoadingWord] = useState(false);
   const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(null);
+  const [online, setOnline] = useState(isOnline());
+
+  useEffect(() => {
+    return onNetworkChange(setOnline);
+  }, []);
 
   useEffect(() => {
     const book = searchParams.get("book");
@@ -51,6 +57,23 @@ export default function Biblia() {
     setChapterContent("");
     setLoadingChapter(true);
     saveReadingState(book, chapter, version);
+
+    // Try offline cache first
+    try {
+      const cached = await getCachedBibleChapter(version, book, chapter);
+      if (cached) {
+        setChapterContent(cached);
+        setLoadingChapter(false);
+        return;
+      }
+    } catch {}
+
+    // If offline and no cache, show message
+    if (!online) {
+      setChapterContent("Sem conexão. Este capítulo ainda não foi salvo offline. Conecte-se à internet para carregá-lo pela primeira vez.");
+      setLoadingChapter(false);
+      return;
+    }
 
     const isHebrew = version === "Bíblia Hebraica (Tanakh)";
 
@@ -73,6 +96,7 @@ export default function Biblia() {
               .map((v: { versiculo: number; texto: string }) => `${v.versiculo} ${v.texto}`)
               .join("\n");
             setChapterContent(text);
+            cacheBibleChapter(version, book, chapter, text).catch(() => {});
             setLoadingChapter(false);
             return;
           }
@@ -128,6 +152,10 @@ export default function Biblia() {
             break;
           }
         }
+      }
+      // Cache the AI content for offline use
+      if (content) {
+        cacheBibleChapter(version, book, chapter, content).catch(() => {});
       }
     } catch {
       setChapterContent("Erro ao carregar o capítulo. Tente novamente.");
@@ -221,8 +249,13 @@ export default function Biblia() {
             </Link>
             <h1 className="font-display text-xl font-bold text-foreground">Bíblia Sagrada</h1>
           </div>
+          {!online && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/20 text-amber-400">
+              <WifiOff className="w-3 h-3" />
+              <span className="text-[10px] font-body font-bold">Offline</span>
+            </div>
+          )}
         </div>
-
         {/* Version selector */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
           <label className="text-xs font-body font-medium text-muted-foreground mb-1.5 block">
