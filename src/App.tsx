@@ -15,6 +15,7 @@ import Materiais from "./pages/Materiais";
 import DicionarioBiblico from "./pages/DicionarioBiblico";
 import EnciclopediaJudaica from "./pages/EnciclopediaJudaica";
 import Install from "./pages/Install";
+import ImportBiblia from "./pages/ImportBiblia";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/dicionario" element={<DicionarioBiblico />} />
           <Route path="/enciclopedia" element={<EnciclopediaJudaica />} />
           <Route path="/install" element={<Install />} />
+          <Route path="/import-biblia" element={<ImportBiblia />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
