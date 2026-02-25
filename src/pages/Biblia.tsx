@@ -92,6 +92,7 @@ export default function Biblia() {
     setLoadingChapter(true);
     saveReadingState(book, chapter, version);
 
+    // 1) Try IndexedDB cache first (works offline)
     try {
       const cached = await getCachedBibleChapter(version, book, chapter);
       if (cached) {
@@ -101,14 +102,9 @@ export default function Biblia() {
       }
     } catch {}
 
-    if (!online) {
-      setChapterContent("Sem conexão. Este capítulo ainda não foi salvo offline. Conecte-se à internet para carregá-lo pela primeira vez.");
-      setLoadingChapter(false);
-      return;
-    }
-
     const isHebrew = version === "Bíblia Hebraica (Tanakh)";
 
+    // 2) Try fetching from database (don't trust navigator.onLine — just try)
     if (!isHebrew) {
       try {
         const dbResp = await fetch(BIBLE_URL, {
@@ -132,9 +128,17 @@ export default function Biblia() {
             return;
           }
         }
-      } catch {}
+      } catch {
+        // Network failed — if truly offline, show message
+        if (!navigator.onLine) {
+          setChapterContent("📴 Sem conexão. Este capítulo ainda não foi salvo offline.\n\nConecte-se à internet para carregá-lo pela primeira vez — depois ficará disponível offline automaticamente.");
+          setLoadingChapter(false);
+          return;
+        }
+      }
     }
 
+    // 3) Fallback to AI streaming
     const prompt = isHebrew
       ? `Mostre o texto de ${book} capítulo ${chapter} em hebraico com transliteração e tradução literal. Formato: cada versículo com o texto hebraico, transliteração e tradução. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`
       : `Mostre o texto completo de ${book} capítulo ${chapter} na versão ${version}. Apenas o texto bíblico com os números dos versículos, sem comentários. NÃO use formatação markdown, asteriscos, negrito ou itálico. Texto puro.`;
@@ -185,7 +189,7 @@ export default function Biblia() {
         cacheBibleChapter(version, book, chapter, content).catch(() => {});
       }
     } catch {
-      setChapterContent("Erro ao carregar o capítulo. Tente novamente.");
+      setChapterContent("📴 Sem conexão. Este capítulo ainda não foi salvo offline.\n\nConecte-se à internet para carregá-lo pela primeira vez.");
     } finally {
       setLoadingChapter(false);
     }
