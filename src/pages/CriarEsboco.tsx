@@ -118,7 +118,27 @@ ${refs ? `Referências adicionais: ${refs}` : ""}
 ${analyses ? `Incluir análises: ${analyses}` : ""}
 ${extraInstructions ? `Instruções extras: ${extraInstructions}` : ""}
 
-Estruture com: introdução, pontos principais com sub-pontos, aplicações práticas e conclusão. Use linguagem pastoral.`;
+Estruture o esboço OBRIGATORIAMENTE nesta ordem:
+
+## 📖 INTRODUÇÃO
+- Apresente o tema de forma envolvente e contextualizada
+- Explique a relevância do tema para a vida cristã hoje
+- Cite o texto base e dê o panorama geral da passagem
+
+## 📝 DESENVOLVIMENTO
+Para cada tópico da lição:
+- Crie subtítulos claros e organizados (Tópico 1, Tópico 2, etc.)
+- Dentro de cada tópico, traga **aplicações práticas** para a vida do ouvinte
+- Inclua **referências bíblicas adicionais** que se relacionem ao texto principal e ao tema
+- Conecte cada ponto ao texto base, mostrando como se relaciona com a passagem central
+- Use linguagem pastoral, didática e acessível
+
+## ✅ CONCLUSÃO
+- Faça um **resumo claro da mensagem**, recapitulando os pontos principais
+- Reforce a aplicação central do texto
+- Encerre com uma exortação ou convite à reflexão/ação
+
+Use linguagem pastoral, rica em referências bíblicas e com aplicações relevantes ao contexto atual.`;
 
     try {
       await streamAI(
