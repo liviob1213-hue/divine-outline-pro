@@ -24,7 +24,19 @@ interface Props {
 }
 
 export default function DeepStudyView({ study, onBack }: Props) {
-  const { estudo } = study;
+  // Handle both { tipo, estudo: {...} } and flat { tipo, titulo, introducao, secoes, ... }
+  const estudo = study?.estudo ?? study as any;
+
+  if (!estudo?.titulo) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <p className="text-sm text-muted-foreground">Não foi possível carregar o estudo.</p>
+        <Button onClick={onBack} variant="outline" className="rounded-xl">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Voltar
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
