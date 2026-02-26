@@ -52,46 +52,55 @@ REGRAS DE CONTEÚDO:
 3. Use analogias do dia a dia sempre que possível para explicar conceitos difíceis.
 4. Mantenha os textos curtos e focados para não quebrar o layout dos cards na tela do celular.`;
 
-const BOOK_LIST_PROMPT = `Você é um teólogo especialista. Dado o nome de um módulo/categoria de estudo bíblico, retorne uma lista de livros bíblicos que pertencem a essa categoria.
+const DEEP_STUDY_PROMPT = `Você é um teólogo e acadêmico especializado em estudos bíblicos profundos. Sua função é gerar material de estudo detalhado e denso para um aplicativo de teologia.
 
-Retorne EXCLUSIVAMENTE um JSON válido sem markdown. Estrutura:
+O usuário irá enviar o nome de um TÓPICO ou MÓDULO.
 
-{
-  "type": "book_list",
-  "category": "Nome da categoria",
-  "books": [
-    { "name": "Nome do livro", "description": "Breve descrição em até 12 palavras", "emoji": "📖" }
-  ]
-}
+Você deve retornar EXCLUSIVAMENTE um objeto JSON válido, seguindo UMA das duas estruturas abaixo, dependendo da situação:
 
-Retorne entre 3 e 20 livros conforme a categoria.`;
+CENÁRIO 1: TÓPICOS ABRANGENTES (Seleção de Livros)
 
-const DEEP_STUDY_PROMPT = `Você é um teólogo brilhante e professor didático. Gere um estudo aprofundado sobre um livro ou tema bíblico específico.
+Se o tópico for uma categoria que agrupa vários livros (ex: "Livros Históricos", "Livros Poéticos", "Pentateuco", "Epístolas Paulinas", "Evangelhos Sinóticos"), você NÃO deve gerar o estudo ainda. Você deve retornar a lista de livros que compõem essa categoria para o usuário escolher.
 
-Retorne EXCLUSIVAMENTE um JSON válido sem markdown. Estrutura:
+Estrutura JSON (Cenário 1):
 
 {
-  "type": "deep_study",
-  "title": "Título do estudo",
-  "introduction": "Um parágrafo introdutório envolvente de 2-3 frases.",
-  "sections": [
-    {
-      "subtitle": "Subtítulo da seção",
-      "content": "Conteúdo detalhado da seção com 3-5 frases. Use linguagem acessível e rica."
-    }
-  ],
-  "key_verse": {
-    "reference": "Referência bíblica (ex: João 3:16)",
-    "text": "Texto do versículo"
-  },
-  "practical_application": "Uma aplicação prática para o dia a dia em 2-3 frases."
+  "tipo": "selecao_livros",
+  "titulo_categoria": "Livros Históricos",
+  "descricao_curta": "Escolha um dos livros abaixo para gerar um estudo profundo.",
+  "livros": ["Josué", "Juízes", "Rute", "1 Samuel", "2 Samuel", "1 Reis", "2 Reis", "1 Crônicas", "2 Crônicas", "Esdras", "Neemias", "Ester"]
 }
 
-REGRAS:
-1. Gere exatamente 4-6 seções.
-2. Use linguagem acessível mas com profundidade teológica.
-3. Inclua contexto histórico, significado teológico e aplicação prática.
-4. O versículo-chave deve ser o mais representativo do tema.`;
+CENÁRIO 2: TÓPICO ESPECÍFICO OU LIVRO ESPECÍFICO (Estudo Profundo)
+
+Se o tópico for um assunto específico (ex: "Apocalipse", "Soteriologia", "Hermenêutica", ou um livro específico escolhido no Cenário 1 como "Gênesis"), você deve gerar um ESTUDO COMPLETO, denso e articulado.
+
+Estrutura JSON (Cenário 2):
+
+{
+  "tipo": "estudo_profundo",
+  "estudo": {
+    "titulo": "Estudo Completo: O Livro de Apocalipse",
+    "introducao": "Um parágrafo denso e teológico introduzindo o tema, autoria, data e contexto histórico.",
+    "secoes": [
+      {
+        "subtitulo": "Tema Central e Propósito",
+        "conteudo": "Explicação detalhada sobre o tema em 2 ou 3 parágrafos."
+      },
+      {
+        "subtitulo": "Estrutura Literária e Simbolismo",
+        "conteudo": "Análise profunda das características do texto."
+      },
+      {
+        "subtitulo": "Principais Visões e Interpretações",
+        "conteudo": "Abordagem teológica (Preterista, Futurista, Histórica, Idealista)."
+      }
+    ],
+    "aplicacao_pratica": "Como aplicar este conhecimento teológico na vida prática cristã hoje."
+  }
+}
+
+REGRA ABSOLUTA: Retorne APENAS o JSON. Nenhuma palavra a mais.`;
 
 async function callAI(systemPrompt: string, userMessage: string) {
   const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
@@ -116,7 +125,6 @@ async function callAI(systemPrompt: string, userMessage: string) {
     const t = await response.text();
     console.error("OpenAI error:", response.status, t);
     if (response.status === 429) throw new Error("Limite de requisições excedido. Tente novamente em alguns segundos.");
-    if (response.status === 402) throw new Error("Créditos da API esgotados.");
     throw new Error(`Erro no serviço de IA (${response.status}): ${t}`);
   }
 
@@ -144,11 +152,10 @@ serve(async (req) => {
 
     let parsed;
 
-    if (mode === "book_list") {
-      parsed = await callAI(BOOK_LIST_PROMPT, `Liste os livros bíblicos da categoria: ${moduleName}`);
-    } else if (mode === "deep_study") {
+    if (mode === "deep_study") {
+      // Deep study mode: the AI decides whether to return book_list or deep study
       const topic = bookName || moduleName;
-      parsed = await callAI(DEEP_STUDY_PROMPT, `Gere um estudo aprofundado sobre: ${topic}`);
+      parsed = await callAI(DEEP_STUDY_PROMPT, topic);
     } else {
       // Default: flashcards mode
       parsed = await callAI(FLASHCARD_PROMPT, `Gere o deck de estudo para o módulo: ${moduleName}`);

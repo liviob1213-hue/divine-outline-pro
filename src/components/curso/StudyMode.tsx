@@ -27,12 +27,6 @@ interface Props {
   onBack: () => void;
 }
 
-interface BookItem {
-  name: string;
-  description: string;
-  emoji: string;
-}
-
 function placeholderCards(title: string): StudyCard[] {
   return [
     { id: "ph-1", front: `Bem-vindo ao módulo: ${title}`, back: "Este módulo será alimentado com conteúdo em breve. Use o botão 'Gerar com IA' para criar cards de estudo!", type: "concept" },
@@ -70,7 +64,9 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
 
   // Deep study state
   const [viewMode, setViewMode] = useState<"cards" | "books" | "deep_study">("cards");
-  const [books, setBooks] = useState<BookItem[]>([]);
+  const [bookList, setBookList] = useState<string[]>([]);
+  const [bookCategory, setBookCategory] = useState("");
+  const [bookDescription, setBookDescription] = useState("");
   const [loadingBooks, setLoadingBooks] = useState(false);
   const [loadingBook, setLoadingBook] = useState<string | null>(null);
   const [deepStudy, setDeepStudy] = useState<DeepStudy | null>(null);
@@ -138,12 +134,23 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     }
   };
 
-  const handleOpenBookList = async () => {
+  const handleOpenDeepStudy = async () => {
     setLoadingBooks(true);
     setViewMode("books");
     try {
-      const data = await fetchAI({ moduleName: mod.title, mode: "book_list" });
-      setBooks(data.books || []);
+      const data = await fetchAI({ moduleName: mod.title, mode: "deep_study" });
+
+      if (data.tipo === "selecao_livros") {
+        // AI returned a book list — show selector
+        setBookList(data.livros || []);
+        setBookCategory(data.titulo_categoria || mod.title);
+        setBookDescription(data.descricao_curta || "Escolha um livro para estudar.");
+      } else if (data.tipo === "estudo_profundo") {
+        // AI returned a deep study directly (specific topic)
+        setDeepStudy(data as DeepStudy);
+        setViewMode("deep_study");
+        onAddXp(30);
+      }
     } catch (e: any) {
       toast({ title: "Erro", description: e.message, variant: "destructive" });
       setViewMode("cards");
@@ -156,7 +163,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     setLoadingBook(bookName);
     try {
       const data = await fetchAI({ moduleName: mod.title, mode: "deep_study", bookName });
-      setDeepStudy({ ...data, type: "deep_study" });
+      setDeepStudy(data as DeepStudy);
       setViewMode("deep_study");
       onAddXp(30);
     } catch (e: any) {
@@ -226,14 +233,15 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
             </button>
             <div className="flex-1 min-w-0">
               <h2 className="text-sm font-display font-bold text-foreground truncate">{mod.title}</h2>
-              <p className="text-[10px] text-muted-foreground">Escolha um livro</p>
+              <p className="text-[10px] text-muted-foreground">Estudo Profundo</p>
             </div>
           </div>
         </div>
         <div className="relative z-10 flex-1 px-4 pb-6">
           <BookSelector
-            category={mod.title}
-            books={books}
+            category={bookCategory || mod.title}
+            description={bookDescription}
+            books={bookList}
             loading={loadingBooks}
             loadingBook={loadingBook}
             onSelectBook={handleSelectBook}
@@ -317,7 +325,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
           </Button>
           <Button
             variant="outline"
-            onClick={handleOpenBookList}
+            onClick={handleOpenDeepStudy}
             disabled={loadingBooks}
             className="flex-1 h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
           >
