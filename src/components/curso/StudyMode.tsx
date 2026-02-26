@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Flame, Trophy, Sparkles, ChevronRight, X, Check, Loader2, BookOpen } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, Sparkles, ChevronRight, X, Check, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +8,7 @@ import FlashCard from "./FlashCard";
 import QuizView from "./QuizView";
 import BookSelector from "./BookSelector";
 import DeepStudyView, { type DeepStudy } from "./DeepStudyView";
+import ModeSelector from "./ModeSelector";
 import {
   MODULE_LIST,
   BIBLIOLOGIA_CARDS,
@@ -63,7 +64,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
   const [generating, setGenerating] = useState(false);
 
   // Deep study state
-  const [viewMode, setViewMode] = useState<"cards" | "books" | "deep_study">("cards");
+  const [viewMode, setViewMode] = useState<"choose" | "cards" | "books" | "deep_study">("choose");
   const [bookList, setBookList] = useState<string[]>([]);
   const [bookCategory, setBookCategory] = useState("");
   const [bookDescription, setBookDescription] = useState("");
@@ -163,7 +164,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
       }
     } catch (e: any) {
       toast({ title: "Erro", description: e.message, variant: "destructive" });
-      setViewMode("cards");
+      setViewMode("choose");
     } finally {
       setLoadingBooks(false);
     }
@@ -241,7 +242,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     return (
       <div className="min-h-screen bg-background animated-bg relative flex flex-col">
         <div className="relative z-10 flex-1 px-4 pt-4 pb-6">
-          <DeepStudyView study={deepStudy} onBack={() => setViewMode("books")} />
+          <DeepStudyView study={deepStudy} onBack={() => setViewMode("choose")} />
         </div>
       </div>
     );
@@ -253,7 +254,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
       <div className="min-h-screen bg-background animated-bg relative flex flex-col">
         <div className="relative z-10 px-4 pt-4 pb-2">
           <div className="flex items-center gap-3 mb-3">
-            <button onClick={() => setViewMode("cards")} className="p-2 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+            <button onClick={() => setViewMode("choose")} className="p-2 rounded-xl bg-card/60 backdrop-blur border border-border/50">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div className="flex-1 min-w-0">
@@ -270,6 +271,45 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
             loading={loadingBooks}
             loadingBook={loadingBook}
             onSelectBook={handleSelectBook}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Mode selection screen
+  if (viewMode === "choose") {
+    return (
+      <div className="min-h-screen bg-background animated-bg relative flex flex-col">
+        <div className="relative z-10 px-4 pt-4 pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={onBack} className="p-2 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-display font-bold text-foreground truncate">{mod.title}</h2>
+              <p className="text-[10px] text-muted-foreground">Escolha o modo de estudo</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-card/60 backdrop-blur border border-border/50 rounded-full px-2.5 py-1">
+                <Flame className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-[10px] font-bold text-foreground">{streak}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-card/60 backdrop-blur border border-border/50 rounded-full px-2.5 py-1">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[10px] font-bold text-foreground">{xp}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="relative z-10 flex-1">
+          <ModeSelector
+            moduleTitle={mod.title}
+            onSelectFlashcards={() => {
+              setViewMode("cards");
+              handleGenerateAI();
+            }}
+            onSelectDeepStudy={handleOpenDeepStudy}
           />
         </div>
       </div>
@@ -346,18 +386,6 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
               <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Gerando...</>
             ) : (
               <><Sparkles className="w-4 h-4 mr-1" /> Gerar com IA</>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleOpenDeepStudy}
-            disabled={loadingBooks}
-            className="flex-1 h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
-          >
-            {loadingBooks ? (
-              <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Carregando...</>
-            ) : (
-              <><BookOpen className="w-4 h-4 mr-1" /> Estudo Profundo</>
             )}
           </Button>
         </div>
