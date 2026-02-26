@@ -130,8 +130,24 @@ async function callAI(systemPrompt: string, userMessage: string) {
 
   const data = await response.json();
   const rawContent = data.choices?.[0]?.message?.content || "";
-  const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-  return JSON.parse(cleaned);
+  
+  // Robust JSON extraction
+  let cleaned = rawContent.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  const jsonStart = cleaned.search(/[\{\[]/);
+  const jsonEnd = cleaned.lastIndexOf(jsonStart !== -1 && cleaned[jsonStart] === '[' ? ']' : '}');
+  if (jsonStart === -1 || jsonEnd === -1) throw new Error("Nenhum JSON encontrado na resposta da IA");
+  cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+  
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // Fix common issues: trailing commas, control chars
+    cleaned = cleaned
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]")
+      .replace(/[\x00-\x1F\x7F]/g, "");
+    return JSON.parse(cleaned);
+  }
 }
 
 serve(async (req) => {
@@ -153,9 +169,16 @@ serve(async (req) => {
     let parsed;
 
     if (mode === "deep_study") {
-      // Deep study mode: the AI decides whether to return book_list or deep study
-      const topic = bookName || moduleName;
-      parsed = await callAI(DEEP_STUDY_PROMPT, topic);
+      if (bookName) {
+        // A specific book was selected — force deep study generation
+        parsed = await callAI(
+          DEEP_STUDY_PROMPT,
+          `O usuário já escolheu o livro "${bookName}". Gere OBRIGATORIAMENTE um estudo profundo (tipo "estudo_profundo") sobre este livro. NÃO retorne uma lista de livros.`
+        );
+      } else {
+        // Let the AI decide: book list or direct study
+        parsed = await callAI(DEEP_STUDY_PROMPT, moduleName);
+      }
     } else {
       // Default: flashcards mode
       parsed = await callAI(FLASHCARD_PROMPT, `Gere o deck de estudo para o módulo: ${moduleName}`);
