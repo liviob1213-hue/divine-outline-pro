@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
-import { ArrowLeft, Flame, Trophy, Sparkles, RotateCcw, ChevronRight, X, Check, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Flame, Trophy, Sparkles, ChevronRight, X, Check, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 import FlashCard from "./FlashCard";
 import QuizView from "./QuizView";
 import {
@@ -12,6 +13,8 @@ import {
   type StudyCard,
   type QuizQuestion,
 } from "@/lib/theology-course-data";
+
+const COURSE_AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/course-ai`;
 
 interface Props {
   moduleId: number;
@@ -26,19 +29,20 @@ interface Props {
 function placeholderCards(title: string): StudyCard[] {
   return [
     { id: "ph-1", front: `Bem-vindo ao módulo: ${title}`, back: "Este módulo será alimentado com conteúdo em breve. Use o botão 'Gerar com IA' para criar cards de estudo!", type: "concept" },
-    { id: "ph-2", front: `O que estuda ${title}?`, back: "Toque em 'Gerar com IA' para receber uma explicação completa deste conceito teológico.", type: "question" },
   ];
 }
 
 export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgress, onBack }: Props) {
   const mod = MODULE_LIST.find((m) => m.id === moduleId)!;
-  const cards: StudyCard[] = moduleId === 1 ? BIBLIOLOGIA_CARDS : placeholderCards(mod.title);
-  const quiz: QuizQuestion[] = moduleId === 1 ? BIBLIOLOGIA_QUIZ : [];
+  const { toast } = useToast();
 
+  const [cards, setCards] = useState<StudyCard[]>(moduleId === 1 ? BIBLIOLOGIA_CARDS : placeholderCards(mod.title));
+  const [quiz, setQuiz] = useState<QuizQuestion[]>(moduleId === 1 ? BIBLIOLOGIA_QUIZ : []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [knownCards, setKnownCards] = useState<Set<string>>(new Set());
   const [showQuiz, setShowQuiz] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const card = cards[currentIndex];
   const progressPercent = Math.round(((currentIndex + 1) / cards.length) * 100);
@@ -66,6 +70,57 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     onAddXp(score * 25);
     onUpdateProgress(100);
     setFinished(true);
+  };
+
+  const handleGenerateAI = async () => {
+    setGenerating(true);
+    try {
+      const resp = await fetch(COURSE_AI_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ moduleName: mod.title }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || "Erro ao gerar conteúdo");
+      }
+
+      const data = await resp.json();
+
+      // Convert AI response to our card/quiz format
+      const aiCards: StudyCard[] = (data.flashcards || []).map((fc: any, i: number) => ({
+        id: `ai-${moduleId}-${i}`,
+        front: fc.frente,
+        back: `${fc.verso}\n\n💡 ${fc.curiosidade_ou_aplicacao}`,
+        type: i % 2 === 0 ? "concept" : "question" as const,
+      }));
+
+      const aiQuiz: QuizQuestion[] = (data.quiz_final || []).map((q: any, i: number) => ({
+        id: `ai-quiz-${moduleId}-${i}`,
+        question: q.pergunta,
+        options: q.opcoes,
+        correctIndex: q.opcoes.indexOf(q.resposta_correta),
+        explanation: q.explicacao_resposta,
+      }));
+
+      if (aiCards.length > 0) {
+        setCards(aiCards);
+        setQuiz(aiQuiz);
+        setCurrentIndex(0);
+        setKnownCards(new Set());
+        setShowQuiz(false);
+        setFinished(false);
+        toast({ title: "✨ Conteúdo gerado!", description: `${aiCards.length} cards e ${aiQuiz.length} perguntas criados com IA` });
+      }
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Não foi possível gerar conteúdo", variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   // Finished state
@@ -166,9 +221,15 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
           </Button>
           <Button
             variant="outline"
+            onClick={handleGenerateAI}
+            disabled={generating}
             className="h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
           >
-            <Sparkles className="w-4 h-4 mr-1" /> Gerar com IA
+            {generating ? (
+              <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Gerando...</>
+            ) : (
+              <><Sparkles className="w-4 h-4 mr-1" /> Gerar com IA</>
+            )}
           </Button>
         </div>
       </div>
