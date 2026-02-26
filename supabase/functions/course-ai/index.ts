@@ -73,7 +73,7 @@ Estrutura JSON (Cenário 1):
 
 CENÁRIO 2: TÓPICO ESPECÍFICO OU LIVRO ESPECÍFICO (Estudo Profundo)
 
-Se o tópico for um assunto específico (ex: "Apocalipse", "Soteriologia", "Hermenêutica", ou um livro específico escolhido no Cenário 1 como "Gênesis"), você deve gerar um ESTUDO COMPLETO, denso e articulado.
+Se o tópico for um assunto específico (ex: "Apocalipse", "Soteriologia", "Hermenêutica", ou um livro específico escolhido no Cenário 1 como "Gênesis"), você deve gerar um ESTUDO COMPLETO, EXTENSO, DENSO e ARTICULADO.
 
 Estrutura JSON (Cenário 2):
 
@@ -81,26 +81,50 @@ Estrutura JSON (Cenário 2):
   "tipo": "estudo_profundo",
   "estudo": {
     "titulo": "Estudo Completo: O Livro de Apocalipse",
-    "introducao": "Um parágrafo denso e teológico introduzindo o tema, autoria, data e contexto histórico.",
+    "introducao": "Dois ou três parágrafos densos e teológicos introduzindo o tema, autoria, data, contexto histórico e relevância para a igreja.",
     "secoes": [
       {
+        "subtitulo": "Contexto Histórico e Autoria",
+        "conteudo": "3 a 4 parágrafos detalhados sobre o contexto histórico, político e social da época. Quem escreveu, quando, onde e para quem. Inclua detalhes acadêmicos."
+      },
+      {
         "subtitulo": "Tema Central e Propósito",
-        "conteudo": "Explicação detalhada sobre o tema em 2 ou 3 parágrafos."
+        "conteudo": "3 a 4 parágrafos explicando o tema principal do livro/tópico, seu propósito teológico e sua mensagem central."
       },
       {
-        "subtitulo": "Estrutura Literária e Simbolismo",
-        "conteudo": "Análise profunda das características do texto."
+        "subtitulo": "Estrutura Literária e Gênero",
+        "conteudo": "2 a 3 parágrafos analisando a estrutura do texto, o gênero literário, recursos estilísticos e características marcantes."
       },
       {
-        "subtitulo": "Principais Visões e Interpretações",
-        "conteudo": "Abordagem teológica (Preterista, Futurista, Histórica, Idealista)."
+        "subtitulo": "Principais Doutrinas e Ensinamentos",
+        "conteudo": "3 a 4 parágrafos sobre as doutrinas fundamentais presentes, com referências bíblicas específicas."
+      },
+      {
+        "subtitulo": "Interpretações Teológicas",
+        "conteudo": "2 a 3 parágrafos apresentando diferentes correntes interpretativas (se aplicável) com seus principais defensores."
+      },
+      {
+        "subtitulo": "Versículos-chave e Passagens Importantes",
+        "conteudo": "2 a 3 parágrafos destacando os versículos mais importantes com explicação contextual de cada um."
+      },
+      {
+        "subtitulo": "Relevância Contemporânea",
+        "conteudo": "2 a 3 parágrafos sobre como este tema/livro se aplica ao cristianismo atual e à vida da igreja."
       }
     ],
-    "aplicacao_pratica": "Como aplicar este conhecimento teológico na vida prática cristã hoje."
+    "aplicacao_pratica": "Dois parágrafos detalhados sobre como aplicar este conhecimento teológico na vida prática cristã hoje, incluindo reflexões para estudo pessoal e em grupo."
   }
 }
 
+REGRAS IMPORTANTES:
+1. Cada seção deve ter conteúdo EXTENSO com múltiplos parágrafos separados por quebras de linha.
+2. Use referências bíblicas específicas (ex: João 3:16, Romanos 8:28).
+3. Inclua dados históricos e acadêmicos quando relevante.
+4. O estudo deve ter no MÍNIMO 6 seções.
+5. O conteúdo total deve ser equivalente a pelo menos 2000 palavras.
+
 REGRA ABSOLUTA: Retorne APENAS o JSON. Nenhuma palavra a mais.`;
+
 
 async function callAI(systemPrompt: string, userMessage: string) {
   const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
