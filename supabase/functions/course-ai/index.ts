@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `Você é um teólogo brilhante, professor dinâmico e especialista em gamificação educacional. Seu objetivo é criar conteúdo de estudo bíblico e teológico para um aplicativo interativo.
+const FLASHCARD_PROMPT = `Você é um teólogo brilhante, professor dinâmico e especialista em gamificação educacional. Seu objetivo é criar conteúdo de estudo bíblico e teológico para um aplicativo interativo.
 
 O público-alvo varia de jovens a adultos. A linguagem deve ser acessível, engajadora, moderna e sem jargões complexos desnecessários, mas mantendo o rigor e a profundidade bíblica.
 
@@ -52,74 +52,106 @@ REGRAS DE CONTEÚDO:
 3. Use analogias do dia a dia sempre que possível para explicar conceitos difíceis.
 4. Mantenha os textos curtos e focados para não quebrar o layout dos cards na tela do celular.`;
 
+const BOOK_LIST_PROMPT = `Você é um teólogo especialista. Dado o nome de um módulo/categoria de estudo bíblico, retorne uma lista de livros bíblicos que pertencem a essa categoria.
+
+Retorne EXCLUSIVAMENTE um JSON válido sem markdown. Estrutura:
+
+{
+  "type": "book_list",
+  "category": "Nome da categoria",
+  "books": [
+    { "name": "Nome do livro", "description": "Breve descrição em até 12 palavras", "emoji": "📖" }
+  ]
+}
+
+Retorne entre 3 e 20 livros conforme a categoria.`;
+
+const DEEP_STUDY_PROMPT = `Você é um teólogo brilhante e professor didático. Gere um estudo aprofundado sobre um livro ou tema bíblico específico.
+
+Retorne EXCLUSIVAMENTE um JSON válido sem markdown. Estrutura:
+
+{
+  "type": "deep_study",
+  "title": "Título do estudo",
+  "introduction": "Um parágrafo introdutório envolvente de 2-3 frases.",
+  "sections": [
+    {
+      "subtitle": "Subtítulo da seção",
+      "content": "Conteúdo detalhado da seção com 3-5 frases. Use linguagem acessível e rica."
+    }
+  ],
+  "key_verse": {
+    "reference": "Referência bíblica (ex: João 3:16)",
+    "text": "Texto do versículo"
+  },
+  "practical_application": "Uma aplicação prática para o dia a dia em 2-3 frases."
+}
+
+REGRAS:
+1. Gere exatamente 4-6 seções.
+2. Use linguagem acessível mas com profundidade teológica.
+3. Inclua contexto histórico, significado teológico e aplicação prática.
+4. O versículo-chave deve ser o mais representativo do tema.`;
+
+async function callAI(systemPrompt: string, userMessage: string) {
+  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const t = await response.text();
+    console.error("OpenAI error:", response.status, t);
+    if (response.status === 429) throw new Error("Limite de requisições excedido. Tente novamente em alguns segundos.");
+    if (response.status === 402) throw new Error("Créditos da API esgotados.");
+    throw new Error(`Erro no serviço de IA (${response.status}): ${t}`);
+  }
+
+  const data = await response.json();
+  const rawContent = data.choices?.[0]?.message?.content || "";
+  const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+  return JSON.parse(cleaned);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { moduleName } = await req.json();
-    if (!moduleName) {
-      return new Response(JSON.stringify({ error: "moduleName é obrigatório" }), {
+    const body = await req.json();
+    const { moduleName, mode, bookName } = body;
+
+    if (!moduleName && !bookName) {
+      return new Response(JSON.stringify({ error: "moduleName ou bookName é obrigatório" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `Gere o deck de estudo para o módulo: ${moduleName}` },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns segundos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos esgotados. Entre em contato com o suporte." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "Erro no serviço de IA" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-    const rawContent = data.choices?.[0]?.message?.content || "";
-
-    // Parse the JSON from the AI response
     let parsed;
-    try {
-      // Remove possible markdown wrapping
-      const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-      parsed = JSON.parse(cleaned);
-    } catch {
-      console.error("Failed to parse AI JSON:", rawContent);
-      return new Response(JSON.stringify({ error: "Erro ao processar resposta da IA", raw: rawContent }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    if (mode === "book_list") {
+      parsed = await callAI(BOOK_LIST_PROMPT, `Liste os livros bíblicos da categoria: ${moduleName}`);
+    } else if (mode === "deep_study") {
+      const topic = bookName || moduleName;
+      parsed = await callAI(DEEP_STUDY_PROMPT, `Gere um estudo aprofundado sobre: ${topic}`);
+    } else {
+      // Default: flashcards mode
+      parsed = await callAI(FLASHCARD_PROMPT, `Gere o deck de estudo para o módulo: ${moduleName}`);
     }
 
     return new Response(JSON.stringify(parsed), {

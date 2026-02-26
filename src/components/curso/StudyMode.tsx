@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, Flame, Trophy, Sparkles, ChevronRight, X, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, Sparkles, ChevronRight, X, Check, Loader2, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import FlashCard from "./FlashCard";
 import QuizView from "./QuizView";
+import BookSelector from "./BookSelector";
+import DeepStudyView, { type DeepStudy } from "./DeepStudyView";
 import {
   MODULE_LIST,
   BIBLIOLOGIA_CARDS,
@@ -25,17 +27,39 @@ interface Props {
   onBack: () => void;
 }
 
-// placeholder cards for modules without data yet
+interface BookItem {
+  name: string;
+  description: string;
+  emoji: string;
+}
+
 function placeholderCards(title: string): StudyCard[] {
   return [
     { id: "ph-1", front: `Bem-vindo ao módulo: ${title}`, back: "Este módulo será alimentado com conteúdo em breve. Use o botão 'Gerar com IA' para criar cards de estudo!", type: "concept" },
   ];
 }
 
+async function fetchAI(body: Record<string, string>) {
+  const resp = await fetch(COURSE_AI_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || "Erro ao gerar conteúdo");
+  }
+  return resp.json();
+}
+
 export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgress, onBack }: Props) {
   const mod = MODULE_LIST.find((m) => m.id === moduleId)!;
   const { toast } = useToast();
 
+  // Flashcard state
   const [cards, setCards] = useState<StudyCard[]>(moduleId === 1 ? BIBLIOLOGIA_CARDS : placeholderCards(mod.title));
   const [quiz, setQuiz] = useState<QuizQuestion[]>(moduleId === 1 ? BIBLIOLOGIA_QUIZ : []);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,6 +67,13 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
   const [showQuiz, setShowQuiz] = useState(false);
   const [finished, setFinished] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Deep study state
+  const [viewMode, setViewMode] = useState<"cards" | "books" | "deep_study">("cards");
+  const [books, setBooks] = useState<BookItem[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(false);
+  const [loadingBook, setLoadingBook] = useState<string | null>(null);
+  const [deepStudy, setDeepStudy] = useState<DeepStudy | null>(null);
 
   const card = cards[currentIndex];
   const progressPercent = Math.round(((currentIndex + 1) / cards.length) * 100);
@@ -59,7 +90,6 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
   };
 
   const handleDidntKnow = () => handleNext();
-
   const handleLearned = () => {
     setKnownCards((prev) => new Set(prev).add(card.id));
     onAddXp(10);
@@ -75,23 +105,8 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
   const handleGenerateAI = async () => {
     setGenerating(true);
     try {
-      const resp = await fetch(COURSE_AI_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ moduleName: mod.title }),
-      });
+      const data = await fetchAI({ moduleName: mod.title });
 
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.error || "Erro ao gerar conteúdo");
-      }
-
-      const data = await resp.json();
-
-      // Convert AI response to our card/quiz format
       const aiCards: StudyCard[] = (data.flashcards || []).map((fc: any, i: number) => ({
         id: `ai-${moduleId}-${i}`,
         front: fc.frente,
@@ -123,6 +138,34 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     }
   };
 
+  const handleOpenBookList = async () => {
+    setLoadingBooks(true);
+    setViewMode("books");
+    try {
+      const data = await fetchAI({ moduleName: mod.title, mode: "book_list" });
+      setBooks(data.books || []);
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+      setViewMode("cards");
+    } finally {
+      setLoadingBooks(false);
+    }
+  };
+
+  const handleSelectBook = async (bookName: string) => {
+    setLoadingBook(bookName);
+    try {
+      const data = await fetchAI({ moduleName: mod.title, mode: "deep_study", bookName });
+      setDeepStudy({ ...data, type: "deep_study" });
+      setViewMode("deep_study");
+      onAddXp(30);
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    } finally {
+      setLoadingBook(null);
+    }
+  };
+
   // Finished state
   if (finished) {
     return (
@@ -133,7 +176,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
           className="bg-card/80 backdrop-blur border border-border/50 rounded-3xl p-8 text-center max-w-sm w-full"
         >
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-10 h-10 text-white" />
+            <Check className="w-10 h-10 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-display font-bold text-foreground mb-2">Módulo Concluído!</h2>
           <p className="text-muted-foreground mb-1">{mod.title}</p>
@@ -159,6 +202,45 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
   // Quiz state
   if (showQuiz) {
     return <QuizView questions={quiz} moduleName={mod.title} onComplete={handleQuizComplete} onBack={onBack} />;
+  }
+
+  // Deep Study view
+  if (viewMode === "deep_study" && deepStudy) {
+    return (
+      <div className="min-h-screen bg-background animated-bg relative flex flex-col">
+        <div className="relative z-10 flex-1 px-4 pt-4 pb-6">
+          <DeepStudyView study={deepStudy} onBack={() => setViewMode("books")} />
+        </div>
+      </div>
+    );
+  }
+
+  // Book selector view
+  if (viewMode === "books") {
+    return (
+      <div className="min-h-screen bg-background animated-bg relative flex flex-col">
+        <div className="relative z-10 px-4 pt-4 pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={() => setViewMode("cards")} className="p-2 rounded-xl bg-card/60 backdrop-blur border border-border/50">
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-display font-bold text-foreground truncate">{mod.title}</h2>
+              <p className="text-[10px] text-muted-foreground">Escolha um livro</p>
+            </div>
+          </div>
+        </div>
+        <div className="relative z-10 flex-1 px-4 pb-6">
+          <BookSelector
+            category={mod.title}
+            books={books}
+            loading={loadingBooks}
+            loadingBook={loadingBook}
+            onSelectBook={handleSelectBook}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -206,7 +288,7 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
           </Button>
           <Button
             onClick={handleLearned}
-            className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-primary-foreground"
           >
             <Check className="w-4 h-4 mr-1" /> Aprendi!
           </Button>
@@ -219,16 +301,30 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
           >
             Próximo card <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
+        </div>
+        <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={handleGenerateAI}
             disabled={generating}
-            className="h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+            className="flex-1 h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
           >
             {generating ? (
               <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Gerando...</>
             ) : (
               <><Sparkles className="w-4 h-4 mr-1" /> Gerar com IA</>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleOpenBookList}
+            disabled={loadingBooks}
+            className="flex-1 h-10 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+          >
+            {loadingBooks ? (
+              <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Carregando...</>
+            ) : (
+              <><BookOpen className="w-4 h-4 mr-1" /> Estudo Profundo</>
             )}
           </Button>
         </div>
