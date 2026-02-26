@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages } from "lucide-react";
+import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -92,6 +92,16 @@ const tools = [
     iconColor: "text-purple-200",
     link: "/materiais",
     badge: "Novo",
+  },
+  {
+    title: "Curso de Teologia",
+    description: "31 módulos interativos com flashcards e quiz",
+    icon: GraduationCap,
+    bg: "bg-gradient-to-br from-[hsl(262,70%,50%)] to-[hsl(200,70%,45%)]",
+    iconColor: "text-cyan-200",
+    link: "/curso",
+    badge: "Novo",
+    span: "col-span-2",
   },
 ];
 
