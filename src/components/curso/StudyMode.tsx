@@ -146,8 +146,18 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
         setBookCategory(data.titulo_categoria || mod.title);
         setBookDescription(data.descricao_curta || "Escolha um livro para estudar.");
       } else if (data.tipo === "estudo_profundo") {
-        // AI returned a deep study directly (specific topic)
-        setDeepStudy(data as DeepStudy);
+        const normalized: DeepStudy = data?.estudo
+          ? data as DeepStudy
+          : {
+              tipo: "estudo_profundo" as const,
+              estudo: {
+                titulo: data?.titulo || mod.title,
+                introducao: data?.introducao || "",
+                secoes: data?.secoes || [],
+                aplicacao_pratica: data?.aplicacao_pratica || "",
+              },
+            };
+        setDeepStudy(normalized);
         setViewMode("deep_study");
         onAddXp(30);
       }
@@ -163,7 +173,22 @@ export default function StudyMode({ moduleId, streak, xp, onAddXp, onUpdateProgr
     setLoadingBook(bookName);
     try {
       const data = await fetchAI({ moduleName: mod.title, mode: "deep_study", bookName });
-      setDeepStudy(data as DeepStudy);
+      console.log("Deep study raw response:", JSON.stringify(data));
+      
+      // Normalize: ensure we have { tipo, estudo: { titulo, introducao, secoes, aplicacao_pratica } }
+      const normalized: DeepStudy = data?.estudo
+        ? data as DeepStudy
+        : {
+            tipo: "estudo_profundo" as const,
+            estudo: {
+              titulo: data?.titulo || data?.estudo?.titulo || bookName,
+              introducao: data?.introducao || data?.estudo?.introducao || "",
+              secoes: data?.secoes || data?.estudo?.secoes || [],
+              aplicacao_pratica: data?.aplicacao_pratica || data?.estudo?.aplicacao_pratica || "",
+            },
+          };
+      
+      setDeepStudy(normalized);
       setViewMode("deep_study");
       onAddXp(30);
     } catch (e: any) {
