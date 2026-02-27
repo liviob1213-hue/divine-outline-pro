@@ -28,7 +28,7 @@ export default function WebhookTest() {
     const payload = {
       order_status: event,
       Customer: { email: email.trim().toLowerCase() },
-      Product: { name: plan === "annual" ? "PregAI Anual" : "PregAI Mensal" },
+      Product: { name: plan === "annual" ? "Palavraai Anual" : "Palavraai Mensal" },
       order_id: `test-${Date.now()}`,
       subscription_id: `sub-test-${Date.now()}`,
     };

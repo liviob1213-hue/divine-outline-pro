@@ -60,8 +60,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "PregAI — Ferramentas para Pastores",
-        short_name: "PregAI",
+        name: "Palavraai — Ferramentas para Pastores",
+        short_name: "Palavraai",
         description: "Ferramentas de IA para pastores: Bíblia, Harpa Cristã, esboços e mais",
         theme_color: "#1a1025",
         background_color: "#1a1025",

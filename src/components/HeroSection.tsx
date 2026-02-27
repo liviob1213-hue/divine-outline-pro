@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import heroVideo from "@/assets/hero-bible-video.mp4";
 import logoPregai from "@/assets/logo-pregai.png";
 
+// Note: brand name is Palavraai
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden rounded-2xl mb-8">
