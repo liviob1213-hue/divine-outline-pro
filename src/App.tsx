@@ -20,6 +20,7 @@ import Install from "./pages/Install";
 import ImportBiblia from "./pages/ImportBiblia";
 import CursoTeologia from "./pages/CursoTeologia";
 import WebhookTest from "./pages/WebhookTest";
+import Vendas from "./pages/Vendas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/vendas" element={<Vendas />} />
           <Route path="/webhook-test" element={<WebhookTest />} />
           <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
           <Route path="/criar-esboco" element={<AuthGuard><CriarEsboco /></AuthGuard>} />

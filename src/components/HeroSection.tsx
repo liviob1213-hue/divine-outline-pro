@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroVideo from "@/assets/hero-bible-video.mp4";
+import logoPregai from "@/assets/logo-pregai.png";
 
 export default function HeroSection() {
   return (
