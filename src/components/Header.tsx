@@ -1,4 +1,5 @@
-import { BookOpen, Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
+import { Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
+import logoPregai from "@/assets/logo-pregai.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -84,9 +85,7 @@ export default function Header() {
     <>
       <header className="flex items-center justify-between py-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shadow-gold" style={{ background: "var(--gradient-gold)" }}>
-            <BookOpen className="w-5 h-5 text-white" />
-          </div>
+          <img src={logoPregai} alt="PregAI" className="w-9 h-9 drop-shadow-lg" />
           <span className="font-display font-bold text-lg text-foreground">
             PregAI
           </span>

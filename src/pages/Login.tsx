@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, LogIn, Loader2 } from "lucide-react";
+import { LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import logoPregai from "@/assets/logo-pregai.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -92,9 +93,7 @@ export default function Login() {
       <AnimatedBackground />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-gold mx-auto mb-4" style={{ background: "var(--gradient-gold)" }}>
-            <BookOpen className="w-8 h-8 text-white" />
-          </div>
+          <img src={logoPregai} alt="PregAI Logo" className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl" />
           <h1 className="font-display text-3xl font-bold text-foreground">PregAI</h1>
           <p className="text-muted-foreground mt-2">Ferramentas inteligentes para pastores</p>
         </div>
