@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.course-ai]
 verify_jwt = false
+
+[functions.daily-verse]
+verify_jwt = false
