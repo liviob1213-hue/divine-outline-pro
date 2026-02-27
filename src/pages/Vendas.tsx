@@ -5,11 +5,11 @@ import {
   BookOpen, Sparkles, Music, Heart, NotebookPen, Languages,
   BookMarked, MessageCircle, FileText, FolderOpen, GraduationCap,
   CheckCircle2, XCircle, ArrowRight, Star, Shield, Clock, Zap,
-  Users, Crown, ChevronDown, Play
-} from "lucide-react";
+  Users, Crown, ChevronDown, Play } from
+"lucide-react";
 import { Button } from "@/components/ui/button";
 import logoPregai from "@/assets/logo-pregai.png";
-
+import ugcVideo from "@/assets/ugc-pastor-video.mp4";
 
 // ─── Countdown Timer ───────────────────────────────
 function useCountdown(hours: number) {
@@ -36,57 +36,57 @@ function useCountdown(hours: number) {
   }, [timeLeft]);
 
   const h = Math.floor(timeLeft / 3600000);
-  const m = Math.floor((timeLeft % 3600000) / 60000);
-  const s = Math.floor((timeLeft % 60000) / 1000);
+  const m = Math.floor(timeLeft % 3600000 / 60000);
+  const s = Math.floor(timeLeft % 60000 / 1000);
   return { h, m, s, expired: timeLeft <= 0 };
 }
 
 // ─── Data ──────────────────────────────────────────
 const features = [
-  { icon: BookOpen, title: "Bíblia em 13 Versões", desc: "ARC, ARA, NVI, KJV, NVT e muito mais — tudo offline e instantâneo." },
-  { icon: Sparkles, title: "Criador de Esboços com IA", desc: "Gere sermões completos com +35 análises teológicas em segundos." },
-  { icon: Music, title: "Harpa Cristã Completa", desc: "640 hinos com busca por número, título ou trecho da letra." },
-  { icon: Heart, title: "Versículos Favoritos", desc: "Salve e organize seus versículos preferidos para acesso rápido." },
-  { icon: NotebookPen, title: "Anotações Pessoais", desc: "Seus estudos organizados — nunca mais perca uma reflexão." },
-  { icon: Languages, title: "Dicionário Bíblico", desc: "Significados originais em hebraico e grego com contexto histórico." },
-  { icon: BookMarked, title: "Enciclopédia Judaica", desc: "Tradições, cultura e história para pregações com profundidade." },
-  { icon: MessageCircle, title: "Chat Teológico com IA", desc: "Tire dúvidas teológicas com um agente especialista 24h." },
-  { icon: FileText, title: "Banco de Temas", desc: "+200 temas prontos organizados para suas pregações." },
-  { icon: FolderOpen, title: "Materiais do Pastor", desc: "Armazene e organize imagens, vídeos e documentos." },
-  { icon: GraduationCap, title: "Curso de Teologia", desc: "31 módulos com flashcards, quiz e estudo aprofundado." },
-];
+{ icon: BookOpen, title: "Bíblia em 13 Versões", desc: "ARC, ARA, NVI, KJV, NVT e muito mais — tudo offline e instantâneo." },
+{ icon: Sparkles, title: "Criador de Esboços com IA", desc: "Gere sermões completos com +35 análises teológicas em segundos." },
+{ icon: Music, title: "Harpa Cristã Completa", desc: "640 hinos com busca por número, título ou trecho da letra." },
+{ icon: Heart, title: "Versículos Favoritos", desc: "Salve e organize seus versículos preferidos para acesso rápido." },
+{ icon: NotebookPen, title: "Anotações Pessoais", desc: "Seus estudos organizados — nunca mais perca uma reflexão." },
+{ icon: Languages, title: "Dicionário Bíblico", desc: "Significados originais em hebraico e grego com contexto histórico." },
+{ icon: BookMarked, title: "Enciclopédia Judaica", desc: "Tradições, cultura e história para pregações com profundidade." },
+{ icon: MessageCircle, title: "Chat Teológico com IA", desc: "Tire dúvidas teológicas com um agente especialista 24h." },
+{ icon: FileText, title: "Banco de Temas", desc: "+200 temas prontos organizados para suas pregações." },
+{ icon: FolderOpen, title: "Materiais do Pastor", desc: "Armazene e organize imagens, vídeos e documentos." },
+{ icon: GraduationCap, title: "Curso de Teologia", desc: "31 módulos com flashcards, quiz e estudo aprofundado." }];
+
 
 const comparison = [
-  { feature: "Versões da Bíblia", us: "13 versões", them: "6 versões" },
-  { feature: "Criador de Esboços com IA", us: true, them: false },
-  { feature: "Chat Teológico com IA", us: true, them: false },
-  { feature: "Dicionário Bíblico Completo", us: true, them: "Limitado" },
-  { feature: "Enciclopédia Judaica", us: true, them: false },
-  { feature: "Harpa Cristã (640 hinos)", us: true, them: false },
-  { feature: "Curso de Teologia (31 módulos)", us: true, them: false },
-  { feature: "Banco de Temas para Pregação", us: true, them: false },
-  { feature: "Materiais do Pastor", us: true, them: false },
-  { feature: "Anotações e Favoritos", us: true, them: "Básico" },
-  { feature: "Funciona Offline", us: true, them: true },
-  { feature: "Preço", us: "R$ 29,97/ano", them: "R$ 99,90/ano" },
-];
+{ feature: "Versões da Bíblia", us: "13 versões", them: "6 versões" },
+{ feature: "Criador de Esboços com IA", us: true, them: false },
+{ feature: "Chat Teológico com IA", us: true, them: false },
+{ feature: "Dicionário Bíblico Completo", us: true, them: "Limitado" },
+{ feature: "Enciclopédia Judaica", us: true, them: false },
+{ feature: "Harpa Cristã (640 hinos)", us: true, them: false },
+{ feature: "Curso de Teologia (31 módulos)", us: true, them: false },
+{ feature: "Banco de Temas para Pregação", us: true, them: false },
+{ feature: "Materiais do Pastor", us: true, them: false },
+{ feature: "Anotações e Favoritos", us: true, them: "Básico" },
+{ feature: "Funciona Offline", us: true, them: true },
+{ feature: "Preço", us: "R$ 29,97/ano", them: "R$ 99,90/ano" }];
+
 
 const testimonials = [
-  { name: "Pr. Marcos Oliveira", city: "São Paulo, SP", text: "Revolucionou minha preparação de sermões. O criador de esboços com IA me economiza horas toda semana. Não consigo mais pregar sem essa ferramenta!", stars: 5, avatar: "MO" },
-  { name: "Pr. Daniel Santos", city: "Belo Horizonte, MG", text: "A enciclopédia judaica e o dicionário bíblico trouxeram uma profundidade que eu não encontro em nenhum outro app. Minhas pregações ficaram muito mais ricas.", stars: 5, avatar: "DS" },
-  { name: "Pra. Ana Beatriz", city: "Rio de Janeiro, RJ", text: "O chat teológico é incrível! Consigo tirar dúvidas em tempo real enquanto estudo. E os 640 hinos da Harpa Cristã são um bônus maravilhoso.", stars: 5, avatar: "AB" },
-  { name: "Pr. João Paulo", city: "Curitiba, PR", text: "Testei o mBiblia, o YouVersion e vários outros. Nenhum chega perto do PregAI. É feito pensando no pastor, não só no leitor casual.", stars: 5, avatar: "JP" },
-  { name: "Ev. Fernanda Lima", city: "Salvador, BA", text: "O curso de teologia com flashcards e quiz me ajudou a fixar conteúdo que eu estava estudando há meses. A metodologia é simplesmente genial.", stars: 5, avatar: "FL" },
-  { name: "Pr. Ricardo Almeida", city: "Fortaleza, CE", text: "Assinei o plano vitalício e foi o melhor investimento que fiz. Uso todos os dias e a cada atualização fica melhor ainda.", stars: 5, avatar: "RA" },
-];
+{ name: "Pr. Marcos Oliveira", city: "São Paulo, SP", text: "Revolucionou minha preparação de sermões. O criador de esboços com IA me economiza horas toda semana. Não consigo mais pregar sem essa ferramenta!", stars: 5, avatar: "MO" },
+{ name: "Pr. Daniel Santos", city: "Belo Horizonte, MG", text: "A enciclopédia judaica e o dicionário bíblico trouxeram uma profundidade que eu não encontro em nenhum outro app. Minhas pregações ficaram muito mais ricas.", stars: 5, avatar: "DS" },
+{ name: "Pra. Ana Beatriz", city: "Rio de Janeiro, RJ", text: "O chat teológico é incrível! Consigo tirar dúvidas em tempo real enquanto estudo. E os 640 hinos da Harpa Cristã são um bônus maravilhoso.", stars: 5, avatar: "AB" },
+{ name: "Pr. João Paulo", city: "Curitiba, PR", text: "Testei o mBiblia, o YouVersion e vários outros. Nenhum chega perto do PregAI. É feito pensando no pastor, não só no leitor casual.", stars: 5, avatar: "JP" },
+{ name: "Ev. Fernanda Lima", city: "Salvador, BA", text: "O curso de teologia com flashcards e quiz me ajudou a fixar conteúdo que eu estava estudando há meses. A metodologia é simplesmente genial.", stars: 5, avatar: "FL" },
+{ name: "Pr. Ricardo Almeida", city: "Fortaleza, CE", text: "Assinei o plano vitalício e foi o melhor investimento que fiz. Uso todos os dias e a cada atualização fica melhor ainda.", stars: 5, avatar: "RA" }];
+
 
 const faqs = [
-  { q: "Posso acessar de qualquer dispositivo?", a: "Sim! O PregAI funciona em celular, tablet e computador — basta abrir no navegador." },
-  { q: "Funciona sem internet?", a: "Sim! Os textos bíblicos, hinos e anotações ficam salvos para acesso offline." },
-  { q: "O que acontece se eu cancelar?", a: "Você continua com acesso até o final do período pago. Sem pegadinhas, sem multas." },
-  { q: "O plano vitalício é realmente para sempre?", a: "Sim! Pague uma vez e tenha acesso permanente, incluindo todas as futuras atualizações." },
-  { q: "Como funciona o criador de esboços?", a: "Você digita o tema ou versículo e a IA gera um esboço completo com introdução, desenvolvimento, conclusão e +35 análises teológicas." },
-];
+{ q: "Posso acessar de qualquer dispositivo?", a: "Sim! O PregAI funciona em celular, tablet e computador — basta abrir no navegador." },
+{ q: "Funciona sem internet?", a: "Sim! Os textos bíblicos, hinos e anotações ficam salvos para acesso offline." },
+{ q: "O que acontece se eu cancelar?", a: "Você continua com acesso até o final do período pago. Sem pegadinhas, sem multas." },
+{ q: "O plano vitalício é realmente para sempre?", a: "Sim! Pague uma vez e tenha acesso permanente, incluindo todas as futuras atualizações." },
+{ q: "Como funciona o criador de esboços?", a: "Você digita o tema ou versículo e a IA gera um esboço completo com introdução, desenvolvimento, conclusão e +35 análises teológicas." }];
+
 
 // ─── Component ─────────────────────────────────────
 export default function Vendas() {
@@ -117,22 +117,22 @@ export default function Vendas() {
           background: "radial-gradient(ellipse 600px 400px at 30% 40%, hsl(45 100% 55% / 0.3), transparent)"
         }} />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 pt-12 pb-16 md:pt-20 md:pb-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 pt-12 pb-16 md:pt-20 md:pb-24 bg-[#121216]">
           <div className="text-center">
             <motion.img
               src={logoPregai}
               alt="PregAI Logo"
-              className="w-36 h-36 md:w-48 md:h-48 mx-auto mb-6 drop-shadow-2xl"
+              className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 drop-shadow-2xl"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            />
+              transition={{ duration: 0.5 }} />
+
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
+              transition={{ delay: 0.2 }}>
+
               <span className="inline-flex items-center gap-1.5 bg-primary/20 backdrop-blur-sm text-primary-foreground px-4 py-1.5 rounded-full text-xs font-body font-bold uppercase tracking-wider mb-5">
                 <Sparkles className="w-3.5 h-3.5" />
                 A Ferramenta #1 do Pastor
@@ -143,8 +143,8 @@ export default function Vendas() {
               className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-5"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+              transition={{ delay: 0.3 }}>
+
               Prepare Sermões{" "}
               <span className="text-gradient-gold">Impactantes</span>
               <br />em Minutos, Não em Horas
@@ -154,8 +154,8 @@ export default function Vendas() {
               className="text-lg md:text-xl text-muted-foreground font-body max-w-2xl mx-auto mb-8 leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+              transition={{ delay: 0.4 }}>
+
               Bíblia em 13 versões, criador de esboços com IA, dicionário bíblico, enciclopédia judaica, 
               harpa cristã e muito mais — <strong className="text-foreground">tudo numa única ferramenta feita para pastores.</strong>
             </motion.p>
@@ -164,14 +164,14 @@ export default function Vendas() {
               className="flex flex-col sm:flex-row gap-3 justify-center items-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
+              transition={{ delay: 0.5 }}>
+
               <Button
                 onClick={scrollToPrice}
                 size="lg"
                 className="h-14 px-8 text-base font-bold rounded-xl shadow-gold hover:scale-105 transition-transform"
-                style={{ background: "var(--gradient-gold)" }}
-              >
+                style={{ background: "var(--gradient-gold)" }}>
+
                 <Crown className="w-5 h-5 mr-2" />
                 QUERO ACESSO AGORA
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -187,18 +187,18 @@ export default function Vendas() {
               className="mt-10 flex items-center justify-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-            >
+              transition={{ delay: 0.7 }}>
+
               <div className="flex -space-x-2">
-                {["MO", "DS", "AB", "JP"].map((initials, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground border-2 border-background">
+                {["MO", "DS", "AB", "JP"].map((initials, i) =>
+                <div key={i} className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground border-2 border-background">
                     {initials}
                   </div>
-                ))}
+                )}
               </div>
               <div className="text-left">
                 <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
+                  {[1, 2, 3, 4, 5].map((i) => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
                 </div>
                 <p className="text-xs text-muted-foreground font-body">+2.400 pastores já usam</p>
               </div>
@@ -207,6 +207,26 @@ export default function Vendas() {
         </div>
       </section>
 
+      {/* ── UGC Video Section ── */}
+      <section className="py-16 px-4 bg-card/50">
+        <div className="max-w-4xl mx-auto text-center bg-[#190c31]">
+          <h2 className="font-display text-2xl md:text-4xl font-bold mb-3">
+            Veja o PregAI <span className="text-gradient-gold">em Ação</span>
+          </h2>
+          <p className="text-muted-foreground font-body mb-8 max-w-xl mx-auto">
+            Pastores de todo o Brasil já transformaram sua preparação ministerial
+          </p>
+          <div className="max-w-sm mx-auto rounded-2xl overflow-hidden shadow-card border border-border">
+            <video
+              className="w-full aspect-[9/16] object-cover"
+              controls
+              playsInline
+              preload="metadata"
+              src={ugcVideo} />
+
+          </div>
+        </div>
+      </section>
 
       {/* ── Pain Points ── */}
       <section className="py-16 px-4">
@@ -216,27 +236,27 @@ export default function Vendas() {
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              "Passa horas preparando sermões e nunca sobra tempo para a família",
-              "Sente que suas pregações estão repetitivas e sem profundidade",
-              "Não encontra um app bíblico completo — precisa de vários apps",
-              "Quer estudar teologia mas não tem tempo nem dinheiro para seminário",
-              "Precisa de um dicionário bíblico confiável e não acha",
-              "Gostaria de ter um assistente teológico 24h para tirar dúvidas",
-            ].map((pain, i) => (
-              <motion.div
-                key={i}
-                className="flex items-start gap-3 bg-card rounded-xl p-4 border border-border"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
+            "Passa horas preparando sermões e nunca sobra tempo para a família",
+            "Sente que suas pregações estão repetitivas e sem profundidade",
+            "Não encontra um app bíblico completo — precisa de vários apps",
+            "Quer estudar teologia mas não tem tempo nem dinheiro para seminário",
+            "Precisa de um dicionário bíblico confiável e não acha",
+            "Gostaria de ter um assistente teológico 24h para tirar dúvidas"].
+            map((pain, i) =>
+            <motion.div
+              key={i}
+              className="flex items-start gap-3 bg-card rounded-xl p-4 border border-border"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}>
+
                 <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <XCircle className="w-4 h-4 text-destructive" />
                 </div>
                 <p className="font-body text-sm text-foreground">{pain}</p>
               </motion.div>
-            ))}
+            )}
           </div>
           <div className="text-center mt-8">
             <p className="text-lg font-display font-bold text-foreground">
@@ -260,22 +280,22 @@ export default function Vendas() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((f, i) => (
-              <motion.div
-                key={i}
-                className="bg-card rounded-2xl p-5 border border-border hover:border-primary/30 transition-colors group"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-              >
+            {features.map((f, i) =>
+            <motion.div
+              key={i}
+              className="bg-card rounded-2xl p-5 border border-border hover:border-primary/30 transition-colors group"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}>
+
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ background: "var(--gradient-gold)" }}>
                   <f.icon className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <h3 className="font-display font-bold text-sm mb-1 text-foreground">{f.title}</h3>
                 <p className="text-xs text-muted-foreground font-body leading-relaxed">{f.desc}</p>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -294,29 +314,29 @@ export default function Vendas() {
               <div className="p-3 text-center text-foreground">PregAI</div>
               <div className="p-3 text-center text-muted-foreground">mBíblia</div>
             </div>
-            {comparison.map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 text-sm font-body ${i % 2 === 0 ? "bg-card" : "bg-card/50"} border-t border-border`}>
+            {comparison.map((row, i) =>
+            <div key={i} className={`grid grid-cols-3 text-sm font-body ${i % 2 === 0 ? "bg-card" : "bg-card/50"} border-t border-border`}>
                 <div className="p-3 text-foreground font-medium">{row.feature}</div>
                 <div className="p-3 text-center">
-                  {row.us === true ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" />
-                  ) : typeof row.us === "string" ? (
-                    <span className="text-green-400 font-semibold">{row.us}</span>
-                  ) : (
-                    <XCircle className="w-5 h-5 text-destructive mx-auto" />
-                  )}
+                  {row.us === true ?
+                <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
+                typeof row.us === "string" ?
+                <span className="text-green-400 font-semibold">{row.us}</span> :
+
+                <XCircle className="w-5 h-5 text-destructive mx-auto" />
+                }
                 </div>
                 <div className="p-3 text-center">
-                  {row.them === true ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" />
-                  ) : row.them === false ? (
-                    <XCircle className="w-5 h-5 text-destructive/60 mx-auto" />
-                  ) : (
-                    <span className="text-muted-foreground text-xs">{row.them}</span>
-                  )}
+                  {row.them === true ?
+                <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
+                row.them === false ?
+                <XCircle className="w-5 h-5 text-destructive/60 mx-auto" /> :
+
+                <span className="text-muted-foreground text-xs">{row.them}</span>
+                }
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -330,19 +350,19 @@ export default function Vendas() {
           <p className="text-center text-muted-foreground font-body mb-10">Depoimentos reais de quem usa todos os dias</p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={i}
-                className="bg-card rounded-2xl p-5 border border-border"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-              >
+            {testimonials.map((t, i) =>
+            <motion.div
+              key={i}
+              className="bg-card rounded-2xl p-5 border border-border"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}>
+
                 <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-gold text-gold" />
-                  ))}
+                  {Array.from({ length: t.stars }).map((_, j) =>
+                <Star key={j} className="w-4 h-4 fill-gold text-gold" />
+                )}
                 </div>
                 <p className="text-sm font-body text-foreground mb-4 leading-relaxed">"{t.text}"</p>
                 <div className="flex items-center gap-2">
@@ -355,7 +375,7 @@ export default function Vendas() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -366,8 +386,8 @@ export default function Vendas() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+            viewport={{ once: true }}>
+
             <h2 className="font-display text-2xl md:text-4xl font-bold mb-3">
               Escolha Seu <span className="text-gradient-gold">Plano</span>
             </h2>
@@ -388,8 +408,8 @@ export default function Vendas() {
               className="bg-card rounded-2xl p-6 border border-border relative"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+              viewport={{ once: true }}>
+
               <h3 className="font-display text-xl font-bold mb-1">Plano Anual</h3>
               <p className="text-xs text-muted-foreground font-body mb-4">Acesso por 12 meses</p>
               <div className="mb-4">
@@ -401,19 +421,19 @@ export default function Vendas() {
                 <p className="text-xs text-green-400 font-body font-semibold mt-1">Economia de 57%</p>
               </div>
               <div className="space-y-2 text-left mb-6">
-                {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações por 12 meses", "Suporte prioritário"].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm font-body text-foreground">
+                {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações por 12 meses", "Suporte prioritário"].map((item, i) =>
+                <div key={i} className="flex items-center gap-2 text-sm font-body text-foreground">
                     <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                     {item}
                   </div>
-                ))}
+                )}
               </div>
               <a
                 href="https://kiwify.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
+                className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
+
                 ASSINAR PLANO ANUAL
               </a>
             </motion.div>
@@ -424,8 +444,8 @@ export default function Vendas() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
+              transition={{ delay: 0.1 }}>
+
               <div className="absolute top-0 right-0 px-4 py-1 rounded-bl-xl text-xs font-body font-bold text-primary-foreground" style={{ background: "var(--gradient-gold)" }}>
                 MAIS POPULAR
               </div>
@@ -439,20 +459,20 @@ export default function Vendas() {
                 <p className="text-xs text-green-400 font-body font-semibold mt-1">Pagamento único — sem mensalidades</p>
               </div>
               <div className="space-y-2 text-left mb-6">
-                {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações vitalícias", "Suporte VIP prioritário", "Acesso antecipado a novidades"].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm font-body text-foreground">
+                {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações vitalícias", "Suporte VIP prioritário", "Acesso antecipado a novidades"].map((item, i) =>
+                <div key={i} className="flex items-center gap-2 text-sm font-body text-foreground">
                     <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                     {item}
                   </div>
-                ))}
+                )}
               </div>
               <a
                 href="https://kiwify.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl shadow-gold hover:scale-105 transition-transform text-primary-foreground"
-                style={{ background: "var(--gradient-gold)" }}
-              >
+                style={{ background: "var(--gradient-gold)" }}>
+
                 <Crown className="w-4 h-4 inline mr-1" />
                 QUERO ACESSO VITALÍCIO
               </a>
@@ -474,22 +494,22 @@ export default function Vendas() {
             Perguntas <span className="text-gradient-gold">Frequentes</span>
           </h2>
           <div className="space-y-3">
-            {faqs.map((faq, i) => (
-              <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
+            {faqs.map((faq, i) =>
+            <div key={i} className="bg-card rounded-xl border border-border overflow-hidden">
                 <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-4 text-left"
-                >
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between p-4 text-left">
+
                   <span className="font-body font-semibold text-sm text-foreground">{faq.q}</span>
                   <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
                 </button>
-                {openFaq === i && (
-                  <div className="px-4 pb-4">
+                {openFaq === i &&
+              <div className="px-4 pb-4">
                     <p className="text-sm text-muted-foreground font-body">{faq.a}</p>
                   </div>
-                )}
+              }
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -498,7 +518,7 @@ export default function Vendas() {
       <section className="py-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(262,70%,20%)] via-[hsl(262,60%,12%)] to-background" />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <img src={logoPregai} alt="PregAI" className="w-32 h-32 mx-auto mb-6 drop-shadow-2xl" />
+          <img src={logoPregai} alt="PregAI" className="w-20 h-20 mx-auto mb-6 drop-shadow-2xl" />
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
             Comece a Pregar com <span className="text-gradient-gold">Mais Poder</span> Hoje
           </h2>
@@ -509,8 +529,8 @@ export default function Vendas() {
             onClick={scrollToPrice}
             size="lg"
             className="h-14 px-10 text-base font-bold rounded-xl shadow-gold hover:scale-105 transition-transform"
-            style={{ background: "var(--gradient-gold)" }}
-          >
+            style={{ background: "var(--gradient-gold)" }}>
+
             <Crown className="w-5 h-5 mr-2" />
             GARANTIR MEU ACESSO AGORA
             <ArrowRight className="w-5 h-5 ml-2" />
@@ -525,12 +545,12 @@ export default function Vendas() {
       {/* ── Footer ── */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-4xl mx-auto text-center">
-          <img src={logoPregai} alt="PregAI" className="w-16 h-16 mx-auto mb-3" />
+          <img src={logoPregai} alt="PregAI" className="w-10 h-10 mx-auto mb-3" />
           <p className="text-xs text-muted-foreground font-body">
             © {new Date().getFullYear()} PregAI — Ferramentas inteligentes para pastores.
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
