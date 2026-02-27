@@ -86,9 +86,9 @@ export default function Header() {
     <>
       <header className="flex items-center justify-between py-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoPregai} alt="PregAI" className="w-12 h-12 drop-shadow-lg" />
-          <span className="font-display font-bold text-lg text-foreground">
-            PregAI
+          <img src={logoPregai} alt="Palavraai" className="w-20 h-20 drop-shadow-lg" />
+          <span className="font-display font-bold text-xl text-foreground">
+            Palavraai
           </span>
         </Link>
 

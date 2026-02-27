@@ -95,7 +95,7 @@ export default function Login() {
       localStorage.setItem("pregai_login_time", new Date().toISOString());
       localStorage.setItem("pregai_session_token", sessionToken);
 
-      toast({ title: "Bem-vindo ao PregAI! 🎉" });
+      toast({ title: "Bem-vindo ao Palavraai! 🎉" });
       navigate("/");
     } catch {
       toast({ title: "Erro inesperado", variant: "destructive" });
@@ -109,8 +109,8 @@ export default function Login() {
       <AnimatedBackground />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logoPregai} alt="PregAI Logo" className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 drop-shadow-2xl" />
-          <h1 className="font-display text-3xl font-bold text-foreground">PregAI</h1>
+          <img src={logoPregai} alt="Palavraai Logo" className="w-44 h-44 md:w-52 md:h-52 mx-auto mb-4 drop-shadow-2xl" />
+          <h1 className="font-display text-3xl font-bold text-foreground">Palavraai</h1>
           <p className="text-muted-foreground mt-2">Ferramentas inteligentes para pastores</p>
         </div>
 

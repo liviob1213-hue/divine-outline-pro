@@ -72,7 +72,7 @@ export function useNotifications() {
       if ("serviceWorker" in navigator) {
         try {
           const reg = await navigator.serviceWorker.ready;
-          await reg.showNotification("📖 Versículo do Dia — PregAI", options);
+          await reg.showNotification("📖 Versículo do Dia — Palavraai", options);
           return;
         } catch {
           // Fallback to regular notification
@@ -81,7 +81,7 @@ export function useNotifications() {
 
       // Regular notification (works on desktop and some mobile)
       try {
-        new Notification("📖 Versículo do Dia — PregAI", options);
+        new Notification("📖 Versículo do Dia — Palavraai", options);
       } catch {
         // Notification API not available
       }
