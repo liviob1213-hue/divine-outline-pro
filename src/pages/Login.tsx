@@ -74,10 +74,26 @@ export default function Login() {
         return;
       }
 
-      // Save session
+      // Generate unique session token
+      const sessionToken = crypto.randomUUID();
+
+      // Upsert session — replaces any existing session for this email
+      const { error: sessionError } = await supabase
+        .from("user_sessions")
+        .upsert(
+          { email: normalizedEmail, session_token: sessionToken },
+          { onConflict: "email" }
+        );
+
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+      }
+
+      // Save session locally
       localStorage.setItem("pregai_user_email", normalizedEmail);
       localStorage.setItem("pregai_user_plan", data.plan);
       localStorage.setItem("pregai_login_time", new Date().toISOString());
+      localStorage.setItem("pregai_session_token", sessionToken);
 
       toast({ title: "Bem-vindo ao PregAI! 🎉" });
       navigate("/");
@@ -93,7 +109,7 @@ export default function Login() {
       <AnimatedBackground />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logoPregai} alt="PregAI Logo" className="w-20 h-20 mx-auto mb-4 drop-shadow-2xl" />
+          <img src={logoPregai} alt="PregAI Logo" className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 drop-shadow-2xl" />
           <h1 className="font-display text-3xl font-bold text-foreground">PregAI</h1>
           <p className="text-muted-foreground mt-2">Ferramentas inteligentes para pastores</p>
         </div>

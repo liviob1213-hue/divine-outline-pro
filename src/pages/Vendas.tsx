@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoPregai from "@/assets/logo-pregai.png";
-import ugcVideo from "@/assets/ugc-pastor-video.mp4";
+
 
 // ─── Countdown Timer ───────────────────────────────
 function useCountdown(hours: number) {
@@ -122,7 +122,7 @@ export default function Vendas() {
             <motion.img
               src={logoPregai}
               alt="PregAI Logo"
-              className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 drop-shadow-2xl"
+              className="w-36 h-36 md:w-48 md:h-48 mx-auto mb-6 drop-shadow-2xl"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
@@ -207,26 +207,6 @@ export default function Vendas() {
         </div>
       </section>
 
-      {/* ── UGC Video Section ── */}
-      <section className="py-16 px-4 bg-card/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-display text-2xl md:text-4xl font-bold mb-3">
-            Veja o PregAI <span className="text-gradient-gold">em Ação</span>
-          </h2>
-          <p className="text-muted-foreground font-body mb-8 max-w-xl mx-auto">
-            Pastores de todo o Brasil já transformaram sua preparação ministerial
-          </p>
-          <div className="max-w-sm mx-auto rounded-2xl overflow-hidden shadow-card border border-border">
-            <video
-              className="w-full aspect-[9/16] object-cover"
-              controls
-              playsInline
-              preload="metadata"
-              src={ugcVideo}
-            />
-          </div>
-        </div>
-      </section>
 
       {/* ── Pain Points ── */}
       <section className="py-16 px-4">
@@ -518,7 +498,7 @@ export default function Vendas() {
       <section className="py-20 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(262,70%,20%)] via-[hsl(262,60%,12%)] to-background" />
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <img src={logoPregai} alt="PregAI" className="w-20 h-20 mx-auto mb-6 drop-shadow-2xl" />
+          <img src={logoPregai} alt="PregAI" className="w-32 h-32 mx-auto mb-6 drop-shadow-2xl" />
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
             Comece a Pregar com <span className="text-gradient-gold">Mais Poder</span> Hoje
           </h2>
@@ -545,7 +525,7 @@ export default function Vendas() {
       {/* ── Footer ── */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-4xl mx-auto text-center">
-          <img src={logoPregai} alt="PregAI" className="w-10 h-10 mx-auto mb-3" />
+          <img src={logoPregai} alt="PregAI" className="w-16 h-16 mx-auto mb-3" />
           <p className="text-xs text-muted-foreground font-body">
             © {new Date().getFullYear()} PregAI — Ferramentas inteligentes para pastores.
           </p>
