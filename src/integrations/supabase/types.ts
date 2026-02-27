@@ -116,6 +116,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          kiwify_subscription_id: string | null
+          kiwify_transaction_id: string | null
+          plan: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          kiwify_subscription_id?: string | null
+          kiwify_transaction_id?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          kiwify_subscription_id?: string | null
+          kiwify_transaction_id?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,5 +1,5 @@
-import { BookOpen, Moon, Sun, Bell, BellOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { BookOpen, Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function Header() {
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return !document.documentElement.classList.contains("light");
@@ -22,6 +23,13 @@ export default function Header() {
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const { permission, enabled, requestPermission, disableNotifications } = useNotifications();
   const { toast } = useToast();
+
+  const handleLogout = () => {
+    localStorage.removeItem("pregai_user_email");
+    localStorage.removeItem("pregai_user_plan");
+    localStorage.removeItem("pregai_login_time");
+    navigate("/login");
+  };
 
   useEffect(() => {
     if (isDark) {
@@ -98,6 +106,13 @@ export default function Header() {
             title={enabled ? "Desativar notificações" : "Ativar notificações diárias"}
           >
             {enabled ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            title="Sair"
+          >
+            <LogOut className="w-5 h-5" />
           </button>
         </div>
       </header>
