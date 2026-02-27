@@ -113,7 +113,7 @@ export default function Vendas() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(262,70%,20%)] via-[hsl(262,60%,12%)] to-background" />
-        <div className="absolute inset-0 opacity-20" style={{
+        <div className="absolute inset-0 opacity-20 bg-[#121216]" style={{
           background: "radial-gradient(ellipse 600px 400px at 30% 40%, hsl(45 100% 55% / 0.3), transparent)"
         }} />
 
