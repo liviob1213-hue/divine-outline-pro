@@ -11,12 +11,11 @@ import { getAllCachedHinosCount, cacheHinos } from "@/lib/offline-cache";
 const ALL_HINOS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-all-hinos`;
 
 const Index = () => {
-  // Preload all 640 hymns for offline use on first visit
   useEffect(() => {
     const preloadHinos = async () => {
       try {
         const count = await getAllCachedHinosCount();
-        if (count >= 600) return; // Already cached
+        if (count >= 600) return;
 
         const resp = await fetch(ALL_HINOS_URL, {
           method: "POST",
@@ -35,7 +34,7 @@ const Index = () => {
           }
         }
       } catch {
-        // Silently fail - will try again next visit
+        // Silently fail
       }
     };
 
@@ -45,12 +44,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background animated-bg relative">
       <AnimatedBackground />
-      <div className="relative z-10 max-w-2xl mx-auto px-4">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 lg:px-8">
         <Header />
-        <HeroSection />
-        <VersiculoDoDia />
-        <ContinueReading />
-        <ToolsGrid />
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+          {/* Main content */}
+          <div className="lg:col-span-2">
+            <HeroSection />
+            <ToolsGrid />
+          </div>
+          {/* Sidebar on desktop */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-4">
+              <VersiculoDoDia />
+              <ContinueReading />
+            </div>
+          </div>
+        </div>
       </div>
       <BottomNav />
     </div>

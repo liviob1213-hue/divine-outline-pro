@@ -1,6 +1,8 @@
-import { BookOpen, Moon, Sun, Menu } from "lucide-react";
+import { BookOpen, Moon, Sun, Bell, BellOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNotifications } from "@/hooks/use-notifications";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Header() {
   const [isDark, setIsDark] = useState(() => {
@@ -9,6 +11,9 @@ export default function Header() {
     }
     return true;
   });
+
+  const { enabled, requestPermission, disableNotifications } = useNotifications();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (isDark) {
@@ -26,6 +31,30 @@ export default function Header() {
     }
   }, []);
 
+  const handleToggleNotification = async () => {
+    if (enabled) {
+      disableNotifications();
+      toast({ title: "Notificações desativadas", description: "Você não receberá mais o versículo diário." });
+    } else {
+      const result = await requestPermission();
+      if (result === "granted") {
+        toast({ title: "Notificações ativadas! 🔔", description: "Você receberá o versículo do dia às 8h." });
+      } else if (result === "denied") {
+        toast({
+          title: "Permissão negada",
+          description: "Ative as notificações nas configurações do navegador.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Notificações não suportadas",
+          description: "Seu navegador não suporta notificações push.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <header className="flex items-center justify-between py-4">
       <Link to="/" className="flex items-center gap-2">
@@ -37,15 +66,20 @@ export default function Header() {
         </span>
       </Link>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => setIsDark(!isDark)}
           className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title={isDark ? "Modo claro" : "Modo escuro"}
         >
           {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
-        <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-          <Menu className="w-5 h-5" />
+        <button
+          onClick={handleToggleNotification}
+          className={`p-2 rounded-lg transition-colors ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          title={enabled ? "Desativar notificações" : "Ativar notificações diárias"}
+        >
+          {enabled ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
         </button>
       </div>
     </header>
