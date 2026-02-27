@@ -29,6 +29,7 @@ export default function Header() {
     localStorage.removeItem("pregai_user_email");
     localStorage.removeItem("pregai_user_plan");
     localStorage.removeItem("pregai_login_time");
+    localStorage.removeItem("pregai_session_token");
     navigate("/login");
   };
 
@@ -85,7 +86,7 @@ export default function Header() {
     <>
       <header className="flex items-center justify-between py-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoPregai} alt="PregAI" className="w-9 h-9 drop-shadow-lg" />
+          <img src={logoPregai} alt="PregAI" className="w-12 h-12 drop-shadow-lg" />
           <span className="font-display font-bold text-lg text-foreground">
             PregAI
           </span>
