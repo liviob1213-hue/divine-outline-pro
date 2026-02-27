@@ -11,15 +11,37 @@ export function useNotifications() {
     return localStorage.getItem(NOTIFICATION_KEY) === "true";
   });
 
-  const requestPermission = useCallback(async () => {
-    if (!("Notification" in window)) return "denied" as const;
-    const result = await Notification.requestPermission();
-    setPermission(result);
-    if (result === "granted") {
-      localStorage.setItem(NOTIFICATION_KEY, "true");
-      setEnabled(true);
+  // Sync permission state on mount
+  useEffect(() => {
+    if ("Notification" in window) {
+      setPermission(Notification.permission);
     }
-    return result;
+  }, []);
+
+  const requestPermission = useCallback(async () => {
+    if (!("Notification" in window)) return "unsupported" as const;
+
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      if (result === "granted") {
+        localStorage.setItem(NOTIFICATION_KEY, "true");
+        setEnabled(true);
+
+        // Register for push if service worker available
+        if ("serviceWorker" in navigator) {
+          try {
+            await navigator.serviceWorker.ready;
+          } catch {
+            // SW not ready yet, that's ok
+          }
+        }
+      }
+      return result;
+    } catch {
+      // Fallback for older browsers
+      return "denied" as const;
+    }
   }, []);
 
   const disableNotifications = useCallback(() => {
@@ -29,46 +51,56 @@ export function useNotifications() {
 
   const showVerseNotification = useCallback(
     async (text: string, reference: string) => {
-      if (permission !== "granted") return;
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
 
       const today = new Date().toISOString().split("T")[0];
       const lastDate = localStorage.getItem(LAST_NOTIF_KEY);
-      if (lastDate === today) return; // Already shown today
+      if (lastDate === today) return;
 
       localStorage.setItem(LAST_NOTIF_KEY, today);
 
-      // Use service worker notification if available (works in background)
+      const body = `"${text.slice(0, 120)}${text.length > 120 ? "..." : ""}" — ${reference}`;
+      const options: NotificationOptions = {
+        body,
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-96x96.png",
+        tag: "daily-verse",
+      };
+
+      // Try service worker notification first (works in background on Android)
       if ("serviceWorker" in navigator) {
-        const reg = await navigator.serviceWorker.ready;
-        await reg.showNotification("📖 Versículo do Dia — PregAI", {
-          body: `"${text.slice(0, 120)}${text.length > 120 ? "..." : ""}" — ${reference}`,
-          icon: "/icons/icon-192x192.png",
-          badge: "/icons/icon-96x96.png",
-          tag: "daily-verse",
-          data: { url: "/" },
-        } as NotificationOptions);
-        new Notification("📖 Versículo do Dia — PregAI", {
-          body: `"${text.slice(0, 120)}${text.length > 120 ? "..." : ""}" — ${reference}`,
-          icon: "/icons/icon-192x192.png",
-          tag: "daily-verse",
-        });
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          await reg.showNotification("📖 Versículo do Dia — PregAI", options);
+          return;
+        } catch {
+          // Fallback to regular notification
+        }
+      }
+
+      // Regular notification (works on desktop and some mobile)
+      try {
+        new Notification("📖 Versículo do Dia — PregAI", options);
+      } catch {
+        // Notification API not available
       }
     },
-    [permission]
+    []
   );
 
-  // Schedule check: when app opens, check if it's past 8AM and notification hasn't been shown
   const checkAndNotify = useCallback(
     async (text: string, reference: string) => {
-      if (!enabled || permission !== "granted") return;
+      if (!enabled) return;
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
 
       const now = new Date();
-      const hour = now.getHours();
-      if (hour >= 8) {
+      if (now.getHours() >= 8) {
         await showVerseNotification(text, reference);
       }
     },
-    [enabled, permission, showVerseNotification]
+    [enabled, showVerseNotification]
   );
 
   return {

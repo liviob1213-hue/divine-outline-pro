@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Share2, Bell, BellOff, RefreshCw } from "lucide-react";
+import { BookOpen, Share2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useToast } from "@/hooks/use-toast";
@@ -19,14 +19,12 @@ const CACHE_KEY = "pregai_daily_verse";
 export default function VersiculoDoDia() {
   const [verse, setVerse] = useState<DailyVerse | null>(null);
   const [loading, setLoading] = useState(true);
-  const { permission, enabled, requestPermission, disableNotifications, checkAndNotify } =
-    useNotifications();
+  const { checkAndNotify } = useNotifications();
   const { toast } = useToast();
 
   const fetchVerse = async () => {
     setLoading(true);
     try {
-      // Check cache first
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached) as DailyVerse;
@@ -36,7 +34,6 @@ export default function VersiculoDoDia() {
         if (parsed.date === todayStr) {
           setVerse(parsed);
           setLoading(false);
-          // Trigger notification check with cached verse
           checkAndNotify(parsed.text, parsed.reference);
           return;
         }
@@ -51,13 +48,11 @@ export default function VersiculoDoDia() {
       setVerse(data);
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
 
-      // Check if we should show notification
       if (data) {
         checkAndNotify(data.text, data.reference);
       }
     } catch (e) {
       console.error("Failed to load daily verse:", e);
-      // Try to use cached verse even if outdated
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) setVerse(JSON.parse(cached));
     } finally {
@@ -92,45 +87,13 @@ export default function VersiculoDoDia() {
     }
   };
 
-  const handleToggleNotification = async () => {
-    if (enabled) {
-      disableNotifications();
-      toast({ title: "Notificações desativadas", description: "Você não receberá mais o versículo diário." });
-    } else {
-      const result = await requestPermission();
-      if (result === "granted") {
-        toast({ title: "Notificações ativadas! 🔔", description: "Você receberá o versículo do dia às 8h da manhã." });
-        if (verse) checkAndNotify(verse.text, verse.reference);
-      } else if (result === "denied") {
-        toast({
-          title: "Permissão negada",
-          description: "Ative as notificações nas configurações do navegador.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
   return (
     <section className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-amber" />
-          <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">
-            Versículo do Dia
-          </h2>
-        </div>
-        <button
-          onClick={handleToggleNotification}
-          className="p-2 rounded-full transition-colors hover:bg-muted"
-          title={enabled ? "Desativar notificações" : "Ativar notificações diárias"}
-        >
-          {enabled ? (
-            <Bell className="w-4 h-4 text-amber" />
-          ) : (
-            <BellOff className="w-4 h-4 text-muted-foreground" />
-          )}
-        </button>
+      <div className="flex items-center gap-2 mb-3">
+        <BookOpen className="w-5 h-5 text-amber" />
+        <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-foreground">
+          Versículo do Dia
+        </h2>
       </div>
 
       <AnimatePresence mode="wait">
@@ -155,13 +118,11 @@ export default function VersiculoDoDia() {
             transition={{ duration: 0.4 }}
             className="relative rounded-xl overflow-hidden"
           >
-            {/* Gradient background */}
             <div
               className="absolute inset-0 opacity-20"
               style={{ background: "var(--gradient-card-amber)" }}
             />
             <div className="relative bg-card/80 backdrop-blur-sm border border-border rounded-xl p-5">
-              {/* Quote */}
               <div className="mb-4">
                 <span className="text-3xl leading-none text-amber opacity-40 font-[family-name:var(--font-display)]">
                   "
@@ -171,23 +132,19 @@ export default function VersiculoDoDia() {
                 </p>
               </div>
 
-              {/* Reference + Actions */}
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-amber">
                   — {verse.reference}
                 </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleShare}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber/10 hover:bg-amber/20 text-amber text-xs font-medium transition-colors"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Compartilhar
-                  </button>
-                </div>
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber/10 hover:bg-amber/20 text-amber text-xs font-medium transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  Compartilhar
+                </button>
               </div>
 
-              {/* Meditation hint */}
               <div className="mt-3 pt-3 border-t border-border/50">
                 <p className="text-xs text-muted-foreground italic">
                   🕊️ Medite neste versículo hoje. Deixe a Palavra de Deus transformar seu dia.
