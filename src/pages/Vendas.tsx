@@ -8,7 +8,7 @@ import {
   Users, Crown, ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoPregai from "@/assets/logo-pregai.png";
+const logoPregai = "/icons/icon-512x512.png";
 
 // ─── Countdown Timer ───────────────────────────────
 function useCountdown(hours: number) {
@@ -407,7 +407,7 @@ export default function Vendas() {
                 ))}
               </div>
               <a
-                href="https://kiwify.com"
+                href="https://pay.kiwify.com.br/g88S7ha"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -445,7 +445,7 @@ export default function Vendas() {
                 ))}
               </div>
               <a
-                href="https://kiwify.com"
+                href="https://pay.kiwify.com.br/7L8CxvR"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl shadow-gold hover:scale-105 transition-transform text-primary-foreground"

@@ -1,5 +1,5 @@
 import { Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
-import logoPregai from "@/assets/logo-pregai.png";
+const logoPregai = "/icons/icon-512x512.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNotifications } from "@/hooks/use-notifications";
