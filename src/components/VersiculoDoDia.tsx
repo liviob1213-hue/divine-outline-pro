@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Share2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNotifications } from "@/hooks/use-notifications";
 import { useToast } from "@/hooks/use-toast";
 
 interface DailyVerse {
@@ -19,7 +18,6 @@ const CACHE_KEY = "pregai_daily_verse";
 export default function VersiculoDoDia() {
   const [verse, setVerse] = useState<DailyVerse | null>(null);
   const [loading, setLoading] = useState(true);
-  const { checkAndNotify } = useNotifications();
   const { toast } = useToast();
 
   const fetchVerse = async () => {
@@ -34,7 +32,6 @@ export default function VersiculoDoDia() {
         if (parsed.date === todayStr) {
           setVerse(parsed);
           setLoading(false);
-          checkAndNotify(parsed.text, parsed.reference);
           return;
         }
       }
@@ -47,10 +44,6 @@ export default function VersiculoDoDia() {
 
       setVerse(data);
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-
-      if (data) {
-        checkAndNotify(data.text, data.reference);
-      }
     } catch (e) {
       console.error("Failed to load daily verse:", e);
       const cached = localStorage.getItem(CACHE_KEY);
