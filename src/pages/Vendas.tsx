@@ -146,7 +146,7 @@ export default function Vendas() {
             >
               Prepare Sermões{" "}
               <span className="text-gradient-gold">Impactantes</span>
-              <br />em Minutos, Não em Horas
+              <br />em Minutos, Estude e Aplique com Graça e Poder
             </motion.h1>
 
             <motion.p
