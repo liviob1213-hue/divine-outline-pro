@@ -42,7 +42,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background animated-bg relative">
+    <div className="min-h-screen bg-background animated-bg relative pb-20">
       <AnimatedBackground />
       <div className="relative z-10 max-w-5xl mx-auto px-4 lg:px-8">
         <Header />
