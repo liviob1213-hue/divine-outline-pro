@@ -214,9 +214,9 @@ export default function Vendas() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {[
-              "Passa horas preparando sermões e nunca sobra tempo para a família",
+              "Passa horas preparando sermões e nunca  consegue ter revelações profundas do texto",
               "Sente que suas pregações estão repetitivas e sem profundidade",
-              "Não encontra um app bíblico completo — precisa de vários apps",
+              "Não encontra um app bíblico completo — Não tem materiais disponiveis para lhe auxiliar",
               "Quer estudar teologia mas não tem tempo nem dinheiro para seminário",
               "Precisa de um dicionário bíblico confiável e não acha",
               "Gostaria de ter um assistente teológico 24h para tirar dúvidas",
