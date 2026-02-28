@@ -11,28 +11,22 @@ import { Button } from "@/components/ui/button";
 const logoPregai = "/logo-palavraai.png";
 
 // ─── Countdown Timer ───────────────────────────────
-function useCountdown(hours: number) {
+function useCountdown(minutes: number) {
   const [timeLeft, setTimeLeft] = useState(() => {
-    const saved = localStorage.getItem("pregai_countdown_end");
-    if (saved) {
-      const diff = new Date(saved).getTime() - Date.now();
-      return diff > 0 ? diff : 0;
-    }
-    const end = Date.now() + hours * 3600 * 1000;
-    localStorage.setItem("pregai_countdown_end", new Date(end).toISOString());
-    return hours * 3600 * 1000;
+    const end = Date.now() + minutes * 60 * 1000;
+    return minutes * 60 * 1000;
   });
 
   useEffect(() => {
     if (timeLeft <= 0) return;
     const interval = setInterval(() => {
-      const saved = localStorage.getItem("pregai_countdown_end");
-      if (!saved) return;
-      const diff = new Date(saved).getTime() - Date.now();
-      setTimeLeft(diff > 0 ? diff : 0);
+      setTimeLeft((prev) => {
+        const next = prev - 1000;
+        return next > 0 ? next : 0;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [timeLeft]);
+  }, [timeLeft > 0]);
 
   const h = Math.floor(timeLeft / 3600000);
   const m = Math.floor(timeLeft % 3600000 / 60000);
@@ -51,7 +45,7 @@ const features = [
 { icon: BookMarked, title: "Enciclopédia Judaica", desc: "Tradições, cultura e história para pregações com profundidade." },
 { icon: MessageCircle, title: "Chat Teológico com IA", desc: "Tire dúvidas teológicas com um agente especialista 24h." },
 { icon: FileText, title: "Banco de Temas", desc: "+200 temas prontos organizados para suas pregações." },
-{ icon: FolderOpen, title: "Materiais do Pastor", desc: "Armazene e organize imagens, vídeos e documentos." },
+{ icon: FolderOpen, title: "Materiais do Pregador", desc: "Armazene e organize imagens, vídeos e documentos." },
 { icon: GraduationCap, title: "Curso de Teologia", desc: "31 módulos com flashcards, quiz e estudo aprofundado." }];
 
 
@@ -64,7 +58,7 @@ const comparison = [
 { feature: "Harpa Cristã (640 hinos)", us: true, them: false },
 { feature: "Curso de Teologia (31 módulos)", us: true, them: false },
 { feature: "Banco de Temas para Pregação", us: true, them: false },
-{ feature: "Materiais do Pastor", us: true, them: false },
+{ feature: "Materiais do Pregador", us: true, them: false },
 { feature: "Anotações e Favoritos", us: true, them: "Básico" },
 { feature: "Funciona Offline", us: true, them: true },
 { feature: "Preço", us: "R$ 29,97/ano", them: "R$ 99,90/ano" }];
@@ -74,7 +68,7 @@ const testimonials = [
 { name: "Pr. Marcos Oliveira", city: "São Paulo, SP", text: "Revolucionou minha preparação de sermões. O criador de esboços com IA me economiza horas toda semana. Não consigo mais pregar sem essa ferramenta!", stars: 5, avatar: "MO" },
 { name: "Pr. Daniel Santos", city: "Belo Horizonte, MG", text: "A enciclopédia judaica e o dicionário bíblico trouxeram uma profundidade que eu não encontro em nenhum outro app. Minhas pregações ficaram muito mais ricas.", stars: 5, avatar: "DS" },
 { name: "Pra. Ana Beatriz", city: "Rio de Janeiro, RJ", text: "O chat teológico é incrível! Consigo tirar dúvidas em tempo real enquanto estudo. E os 640 hinos da Harpa Cristã são um bônus maravilhoso.", stars: 5, avatar: "AB" },
-{ name: "Pr. João Paulo", city: "Curitiba, PR", text: "Testei o mBiblia, o YouVersion e vários outros. Nenhum chega perto do Palavraai. É feito pensando no pastor, não só no leitor casual.", stars: 5, avatar: "JP" },
+{ name: "Pr. João Paulo", city: "Curitiba, PR", text: "Testei o mBiblia, o YouVersion e vários outros. Nenhum chega perto do Palavraai. É feito pensando no pregador, não só no leitor casual.", stars: 5, avatar: "JP" },
 { name: "Ev. Fernanda Lima", city: "Salvador, BA", text: "O curso de teologia com flashcards e quiz me ajudou a fixar conteúdo que eu estava estudando há meses. A metodologia é simplesmente genial.", stars: 5, avatar: "FL" },
 { name: "Pr. Ricardo Almeida", city: "Fortaleza, CE", text: "Assinei o plano vitalício e foi o melhor investimento que fiz. Uso todos os dias e a cada atualização fica melhor ainda.", stars: 5, avatar: "RA" }];
 
@@ -89,7 +83,7 @@ const faqs = [
 
 // ─── Component ─────────────────────────────────────
 export default function Vendas() {
-  const countdown = useCountdown(2);
+  const countdown = useCountdown(30);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const scrollToPrice = () => {
@@ -134,7 +128,7 @@ export default function Vendas() {
 
               <span className="inline-flex items-center gap-1.5 bg-primary/20 backdrop-blur-sm text-primary-foreground px-4 py-1.5 rounded-full text-xs font-body font-bold uppercase tracking-wider mb-5">
                 <Sparkles className="w-3.5 h-3.5" />
-                A Ferramenta #1 do Pastor
+                A Ferramenta #1 do Pregador
               </span>
             </motion.div>
 
@@ -146,7 +140,7 @@ export default function Vendas() {
 
               Prepare Sermões{" "}
               <span className="text-gradient-gold">Impactantes</span>
-              <br />em Minutos, Não em Horas
+              <br />em Minutos, Estude e Aplique com Graça e Poder
             </motion.h1>
 
             <motion.p
@@ -154,9 +148,8 @@ export default function Vendas() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}>
-              Conheça a Palavraai um App completo do pregador, tenha acesso a: Bíblia em 13 versão, Criador de esboço com IA, dicionário bíblico, enciclopédia Judaica, Curso completo de Teologia com mais de 31 disciplinas e muito mais — tudo numa única ferramenta feita para pastores.
-
-              <strong className="text-foreground">tudo numa única ferramenta feita para pastores.</strong>
+              Conheça a Palavraai um App completo do pregador, tenha acesso a: Bíblia em 13 versões, Criador de esboço com IA, dicionário bíblico, enciclopédia Judaica, Curso completo de Teologia com mais de 31 disciplinas e muito mais —{" "}
+              <strong className="text-foreground">tudo numa única ferramenta feita para pregadores.</strong>
             </motion.p>
 
             <motion.div
@@ -199,7 +192,7 @@ export default function Vendas() {
                 <div className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />)}
                 </div>
-                <p className="text-xs text-muted-foreground font-body">+2.400 pastores já usam</p>
+                <p className="text-xs text-muted-foreground font-body">+2.400 pregadores já usam</p>
               </div>
             </motion.div>
           </div>
@@ -214,9 +207,9 @@ export default function Vendas() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {[
-            "Passa horas preparando sermões e nunca sobra tempo para a família",
+            "Passa horas preparando sermões e nunca consegue ter revelações profundas do texto",
             "Sente que suas pregações estão repetitivas e sem profundidade",
-            "Não encontra um app bíblico completo — precisa de vários apps",
+            "Não encontra um app bíblico completo — Não tem materiais disponiveis para lhe auxiliar",
             "Quer estudar teologia mas não tem tempo nem dinheiro para seminário",
             "Precisa de um dicionário bíblico confiável e não acha",
             "Gostaria de ter um assistente teológico 24h para tirar dúvidas"].
@@ -270,7 +263,10 @@ export default function Vendas() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ background: "var(--gradient-gold)" }}>
                   <f.icon className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <h3 className="font-display font-bold text-sm mb-1 text-foreground">{f.title}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-display font-bold text-sm text-foreground">{f.title}</h3>
+                  <span className="text-[9px] font-bold font-body uppercase tracking-wider bg-primary/20 text-primary-foreground rounded-full px-2 py-0.5">Nova ferramenta em breve</span>
+                </div>
                 <p className="text-xs text-muted-foreground font-body leading-relaxed">{f.desc}</p>
               </motion.div>
             )}
@@ -284,7 +280,7 @@ export default function Vendas() {
           <h2 className="font-display text-2xl md:text-4xl font-bold text-center mb-3">
             Palavraai vs <span className="text-gradient-gold">mBíblia</span>
           </h2>
-          <p className="text-center text-muted-foreground font-body mb-8">Veja por que pastores estão migrando</p>
+          <p className="text-center text-muted-foreground font-body mb-8">Veja por que pregadores estão migrando</p>
 
           <div className="rounded-2xl border border-border overflow-hidden overflow-x-auto">
             <div className="grid grid-cols-3 bg-primary/10 font-body font-bold text-xs uppercase tracking-wider min-w-[400px]">
@@ -323,7 +319,7 @@ export default function Vendas() {
       <section className="py-12 md:py-16 px-4 bg-card/30">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-display text-2xl md:text-4xl font-bold text-center mb-3">
-            O que Pastores Dizem <span className="text-gradient-gold">Sobre o Palavraai</span>
+            O que Pregadores Dizem <span className="text-gradient-gold">Sobre o Palavraai</span>
           </h2>
           <p className="text-center text-muted-foreground font-body mb-8 md:mb-10">Depoimentos reais de quem usa todos os dias</p>
 
@@ -460,7 +456,7 @@ export default function Vendas() {
           <div className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground font-body">
             <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5" /> 7 dias de garantia</span>
             <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> Acesso imediato</span>
-            <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> +2.400 pastores</span>
+            <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> +2.400 pregadores</span>
           </div>
         </div>
       </section>
@@ -501,7 +497,7 @@ export default function Vendas() {
             Comece a Pregar com <span className="text-gradient-gold">Mais Poder</span> Hoje
           </h2>
           <p className="text-muted-foreground font-body text-base md:text-lg mb-8 max-w-xl mx-auto">
-            Junte-se a mais de 2.400 pastores que já transformaram sua preparação ministerial com o Palavraai.
+            Junte-se a mais de 2.400 pregadores que já transformaram sua preparação ministerial com o Palavraai.
           </p>
           <Button
             onClick={scrollToPrice}
@@ -525,7 +521,7 @@ export default function Vendas() {
         <div className="max-w-4xl mx-auto text-center">
           <img src={logoPregai} alt="Palavraai" className="w-14 h-14 mx-auto mb-3" />
           <p className="text-xs text-muted-foreground font-body">
-            © {new Date().getFullYear()} Palavraai — Ferramentas inteligentes para pastores.
+            © {new Date().getFullYear()} Palavraai — Ferramentas inteligentes para pregadores.
           </p>
         </div>
       </footer>
