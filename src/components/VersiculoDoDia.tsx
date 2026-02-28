@@ -60,12 +60,12 @@ export default function VersiculoDoDia() {
   const handleShare = async () => {
     if (!verse) return;
 
-    const shareText = `📖 Versículo do Dia\n\n"${verse.text}"\n\n— ${verse.reference}\n\nvia PregAI`;
+    const shareText = `📖 Versículo do Dia\n\n"${verse.text}"\n\n— ${verse.reference}\n\nvia Palavraai`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Versículo do Dia — PregAI",
+          title: "Versículo do Dia — Palavraai",
           text: shareText,
         });
       } catch {
