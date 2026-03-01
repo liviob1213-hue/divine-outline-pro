@@ -1,6 +1,8 @@
-import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import InstallGuideDialog from "@/components/InstallGuideDialog";
 
 const tools = [
   {
@@ -116,6 +118,8 @@ const itemVariants = {
 };
 
 export default function ToolsGrid() {
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+
   return (
     <section className="py-6 pb-24">
       <div className="flex items-center gap-2 mb-5">
@@ -153,7 +157,33 @@ export default function ToolsGrid() {
             </Link>
           </motion.div>
         ))}
+
+        {/* Install Guide Button */}
+        <motion.div variants={itemVariants} className="col-span-2 lg:col-span-3">
+          <button
+            onClick={() => setShowInstallGuide(true)}
+            className="relative w-full block rounded-2xl p-5 min-h-[80px] bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all hover:scale-[1.02] hover:shadow-card-hover group overflow-hidden text-left"
+          >
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+            <span className="absolute top-3 right-3 text-[9px] font-bold font-body uppercase tracking-wider bg-black/20 backdrop-blur-sm rounded-full px-2 py-0.5 text-white/90">
+              Grátis
+            </span>
+            <div className="flex items-center gap-3">
+              <Download className="w-7 h-7 text-white" />
+              <div>
+                <h3 className="font-display font-bold text-sm leading-tight mb-0.5">
+                  Instalar no Celular
+                </h3>
+                <p className="text-[11px] opacity-80 font-body leading-snug">
+                  Passo a passo para iOS e Android — funciona offline
+                </p>
+              </div>
+            </div>
+          </button>
+        </motion.div>
       </motion.div>
+
+      <InstallGuideDialog open={showInstallGuide} onOpenChange={setShowInstallGuide} />
     </section>
   );
 }
