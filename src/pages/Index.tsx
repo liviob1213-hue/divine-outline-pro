@@ -6,6 +6,7 @@ import ContinueReading from "@/components/ContinueReading";
 import ToolsGrid from "@/components/ToolsGrid";
 import BottomNav from "@/components/BottomNav";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import NotificationPrompt from "@/components/NotificationPrompt";
 import { getAllCachedHinosCount, cacheHinos } from "@/lib/offline-cache";
 
 const ALL_HINOS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-all-hinos`;
@@ -62,6 +63,7 @@ const Index = () => {
         </div>
       </div>
       <BottomNav />
+      <NotificationPrompt />
     </div>
   );
 };
