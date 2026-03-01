@@ -123,16 +123,22 @@ export default function Vendas() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── Sticky Top Bar ── */}
-      <div className="sticky top-0 z-50 bg-destructive/95 backdrop-blur-sm py-2.5 px-4 flex items-center justify-between">
-        <p className="text-sm font-body font-bold text-destructive-foreground flex-1 text-center">
+      <div className="sticky top-0 z-50 bg-destructive/95 backdrop-blur-sm text-center py-2.5 px-4">
+        <p className="text-sm font-body font-bold text-destructive-foreground">
           🔥 OFERTA EXPIRA EM:{" "}
           <span className="font-mono">
             {String(countdown.h).padStart(2, "0")}:{String(countdown.m).padStart(2, "0")}:{String(countdown.s).padStart(2, "0")}
           </span>
           {" "}— Preço vai subir!
         </p>
-        <Link to="/login" className="shrink-0 ml-2 text-xs font-body font-semibold text-destructive-foreground underline hover:opacity-80 transition-opacity">
-          Já sou cliente
+      </div>
+
+      {/* ── Já sou cliente ── */}
+      <div className="bg-muted/50 border-b border-border py-3 px-4 text-center">
+        <Link to="/login">
+          <Button variant="outline" size="lg" className="font-body font-semibold text-base px-8">
+            Já sou cliente → Acessar
+          </Button>
         </Link>
       </div>
 
