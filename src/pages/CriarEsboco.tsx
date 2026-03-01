@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Minus, Sparkles, ChevronDown, Send, Loader2, MessageCircle, Users } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Sparkles, ChevronDown, Send, Loader2, MessageCircle, Users, FileDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import {
@@ -373,20 +373,61 @@ Crie de **3 a 5 tópicos principais numerados** (1, 2, 3...). Para CADA tópico:
                   </button>
                 </div>
                 <div className="bg-card rounded-2xl p-5 border border-border shadow-card mb-4">
-                  <div className="prose prose-sm max-w-none text-foreground [&_strong]:text-primary [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_li]:text-foreground/90">
+                  <div id="outline-content" className="prose prose-sm max-w-none text-foreground [&_strong]:text-primary [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground [&_li]:text-foreground/90">
                     <ReactMarkdown>{generatedOutline}</ReactMarkdown>
                   </div>
                 </div>
 
-                {/* Debate Questions */}
-                <button
-                  onClick={generateDebateQuestions}
-                  disabled={generatingDebate}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-navy to-navy-deep text-primary-foreground text-sm font-body font-bold flex items-center justify-center gap-2 mb-4 hover:scale-[1.02] transition-transform disabled:opacity-50"
-                >
-                  {generatingDebate ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
-                  {generatingDebate ? "Gerando..." : "Gerar 5 Perguntas para Debate"}
-                </button>
+                {/* Export PDF + Debate buttons */}
+                <div className="flex items-center gap-3 mb-4">
+                  <button
+                    onClick={() => {
+                      const printWindow = window.open('', '_blank');
+                      if (!printWindow) return;
+                      const content = document.getElementById('outline-content')?.innerHTML || '';
+                      printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Esboço - Palavraai</title><style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Inter', sans-serif; color: #1a1a2e; padding: 40px; line-height: 1.7; }
+                        h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+                        h2 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 12px; color: #2d2d5e; border-bottom: 2px solid #6c5ce7; padding-bottom: 6px; }
+                        h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 8px; color: #3d3d7e; }
+                        p { margin-bottom: 10px; font-size: 13px; }
+                        strong { color: #6c5ce7; }
+                        ul, ol { margin-left: 20px; margin-bottom: 12px; }
+                        li { margin-bottom: 6px; font-size: 13px; }
+                        blockquote { border-left: 3px solid #6c5ce7; padding-left: 14px; margin: 14px 0; color: #555; font-style: italic; }
+                        hr { border: none; border-top: 1px solid #e0e0e0; margin: 20px 0; }
+                        .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #6c5ce7; }
+                        .header img { width: 60px; margin-bottom: 8px; }
+                        .header p { font-size: 11px; color: #888; }
+                        .footer { text-align: center; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e0e0e0; font-size: 10px; color: #aaa; }
+                        @media print { body { padding: 20px; } @page { margin: 15mm; } }
+                      </style></head><body>
+                        <div class="header">
+                          <h1>📖 Esboço de Pregação</h1>
+                          <p>Gerado por Palavraai • ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                        ${content}
+                        <div class="footer">Palavraai — Ferramenta de estudo bíblico e pregação</div>
+                      </body></html>`);
+                      printWindow.document.close();
+                      setTimeout(() => { printWindow.print(); }, 500);
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-gradient-gold text-primary text-sm font-body font-bold flex items-center justify-center gap-2 shadow-gold hover:scale-[1.02] transition-transform"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Exportar PDF
+                  </button>
+                  <button
+                    onClick={generateDebateQuestions}
+                    disabled={generatingDebate}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-navy to-navy-deep text-primary-foreground text-sm font-body font-bold flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform disabled:opacity-50"
+                  >
+                    {generatingDebate ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+                    {generatingDebate ? "Gerando..." : "Gerar 5 Perguntas"}
+                  </button>
+                </div>
 
                 {debateQuestions && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-5 border border-border shadow-card mb-4">
