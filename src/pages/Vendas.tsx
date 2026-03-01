@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   BookOpen, Sparkles, Music, Heart, NotebookPen, Languages,
@@ -48,6 +48,20 @@ const features = [
 { icon: FolderOpen, title: "Materiais do Pregador", desc: "Armazene e organize imagens, vídeos e documentos." },
 { icon: GraduationCap, title: "Curso de Teologia", desc: "31 módulos com flashcards, quiz e estudo aprofundado." }];
 
+// ─── Social Proof Names ───────────────────────────
+const socialProofNames = [
+  "Lucas M.", "Ana P.", "Carlos R.", "Fernanda S.", "João V.",
+  "Maria L.", "Pedro H.", "Juliana C.", "Rafael A.", "Beatriz F.",
+  "Daniel O.", "Priscila N.", "Thiago B.", "Camila D.", "André G.",
+  "Patricia M.", "Marcos T.", "Renata K.", "Samuel J.", "Débora E.",
+];
+const socialProofPlans = ["Mensal", "Anual", "Vitalício"];
+const socialProofCities = [
+  "São Paulo, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG",
+  "Salvador, BA", "Curitiba, PR", "Fortaleza, CE", "Recife, PE",
+  "Manaus, AM", "Goiânia, GO", "Brasília, DF",
+];
+
 
 const comparison = [
 { feature: "Versões da Bíblia", us: "13 versões", them: "6 versões" },
@@ -61,7 +75,7 @@ const comparison = [
 { feature: "Materiais do Pregador", us: true, them: false },
 { feature: "Anotações e Favoritos", us: true, them: "Básico" },
 { feature: "Funciona Offline", us: true, them: true },
-{ feature: "Preço", us: "R$ 29,97/ano", them: "R$ 99,90/ano" }];
+{ feature: "Preço", us: "A partir de R$ 27,97/mês", them: "R$ 99,90/ano" }];
 
 
 const testimonials = [
@@ -85,6 +99,22 @@ const faqs = [
 export default function Vendas() {
   const countdown = useCountdown(30);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [proofIndex, setProofIndex] = useState(0);
+
+  // Social proof ticker — rotate every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProofIndex((prev) => (prev + 1) % socialProofNames.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentProof = useMemo(() => ({
+    name: socialProofNames[proofIndex],
+    plan: socialProofPlans[proofIndex % socialProofPlans.length],
+    city: socialProofCities[proofIndex % socialProofCities.length],
+    minutesAgo: (proofIndex % 12) + 1,
+  }), [proofIndex]);
 
   const scrollToPrice = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
@@ -263,10 +293,7 @@ export default function Vendas() {
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ background: "var(--gradient-gold)" }}>
                   <f.icon className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-display font-bold text-sm text-foreground">{f.title}</h3>
-                  <span className="text-[9px] font-bold font-body uppercase tracking-wider bg-primary/20 text-primary-foreground rounded-full px-2 py-0.5">Nova ferramenta em breve</span>
-                </div>
+                <h3 className="font-display font-bold text-sm text-foreground mb-1">{f.title}</h3>
                 <p className="text-xs text-muted-foreground font-body leading-relaxed">{f.desc}</p>
               </motion.div>
             )}
@@ -376,23 +403,56 @@ export default function Vendas() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
-            {/* Annual Plan */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-5xl mx-auto">
+            {/* Monthly Plan */}
             <motion.div
               className="bg-card rounded-2xl p-6 border border-border relative"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}>
+              <h3 className="font-display text-xl font-bold mb-1">Plano Mensal</h3>
+              <p className="text-xs text-muted-foreground font-body mb-4">Acesso por 30 dias</p>
+              <div className="mb-4">
+                <span className="text-sm text-muted-foreground font-body line-through">R$ 49,99</span>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="font-display text-4xl font-bold text-foreground">R$ 27,97</span>
+                  <span className="text-sm text-muted-foreground font-body">/mês</span>
+                </div>
+                <p className="text-xs text-green-400 font-body font-semibold mt-1">Economia de 44%</p>
+              </div>
+              <div className="space-y-2 text-left mb-6">
+                {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações mensais", "Suporte por e-mail"].map((item, i) =>
+                <div key={i} className="flex items-center gap-2 text-sm font-body text-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    {item}
+                  </div>
+                )}
+              </div>
+              <a
+                href="https://pay.kiwify.com.br/rHFCXHm"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl border-2 border-border text-foreground hover:bg-muted transition-colors">
+                ASSINAR PLANO MENSAL
+              </a>
+            </motion.div>
 
+            {/* Annual Plan */}
+            <motion.div
+              className="bg-card rounded-2xl p-6 border border-border relative"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.05 }}>
               <h3 className="font-display text-xl font-bold mb-1">Plano Anual</h3>
               <p className="text-xs text-muted-foreground font-body mb-4">Acesso por 12 meses</p>
               <div className="mb-4">
-                <span className="text-sm text-muted-foreground font-body line-through">R$ 69,99</span>
+                <span className="text-sm text-muted-foreground font-body line-through">R$ 149,99</span>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-display text-4xl font-bold text-foreground">R$ 29,97</span>
+                  <span className="font-display text-4xl font-bold text-foreground">R$ 67,97</span>
                   <span className="text-sm text-muted-foreground font-body">/ano</span>
                 </div>
-                <p className="text-xs text-green-400 font-body font-semibold mt-1">Economia de 57%</p>
+                <p className="text-xs text-green-400 font-body font-semibold mt-1">Economia de 55%</p>
               </div>
               <div className="space-y-2 text-left mb-6">
                 {["Todas as 11 ferramentas", "Criador de Esboços com IA", "Chat Teológico ilimitado", "Atualizações por 12 meses", "Suporte prioritário"].map((item, i) =>
@@ -403,11 +463,10 @@ export default function Vendas() {
                 )}
               </div>
               <a
-                href="https://pay.kiwify.com.br/g88S7ha"
+                href="https://pay.kiwify.com.br/PpkLzCk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-
                 ASSINAR PLANO ANUAL
               </a>
             </motion.div>
@@ -419,16 +478,15 @@ export default function Vendas() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}>
-
               <div className="absolute top-0 right-0 px-4 py-1 rounded-bl-xl text-xs font-body font-bold text-primary-foreground" style={{ background: "var(--gradient-gold)" }}>
                 MAIS POPULAR
               </div>
               <h3 className="font-display text-xl font-bold mb-1">Plano Vitalício</h3>
               <p className="text-xs text-muted-foreground font-body mb-4">Acesso para sempre</p>
               <div className="mb-4">
-                <span className="text-sm text-muted-foreground font-body line-through">R$ 97,99</span>
+                <span className="text-sm text-muted-foreground font-body line-through">R$ 199,99</span>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-display text-4xl font-bold text-gradient-gold">R$ 67,97</span>
+                  <span className="font-display text-4xl font-bold text-gradient-gold">R$ 99,97</span>
                 </div>
                 <p className="text-xs text-green-400 font-body font-semibold mt-1">Pagamento único — sem mensalidades</p>
               </div>
@@ -441,12 +499,11 @@ export default function Vendas() {
                 )}
               </div>
               <a
-                href="https://pay.kiwify.com.br/7L8CxvR"
+                href="https://pay.kiwify.com.br/z0HBQo6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center font-body font-bold text-sm py-3.5 rounded-xl shadow-gold hover:scale-105 transition-transform text-primary-foreground"
                 style={{ background: "var(--gradient-gold)" }}>
-
                 <Crown className="w-4 h-4 inline mr-1" />
                 QUERO ACESSO VITALÍCIO
               </a>
@@ -525,6 +582,33 @@ export default function Vendas() {
           </p>
         </div>
       </footer>
+
+      {/* ── Social Proof Toast ── */}
+      <div className="fixed bottom-4 left-4 z-50 max-w-xs">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={proofIndex}
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="bg-card border border-border rounded-xl px-4 py-3 shadow-lg flex items-center gap-3"
+          >
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground flex-shrink-0">
+              {currentProof.name.split(" ").map(n => n[0]).join("")}
+            </div>
+            <div>
+              <p className="text-xs font-body font-semibold text-foreground">
+                {currentProof.name} <span className="text-muted-foreground font-normal">adquiriu o</span>{" "}
+                <span className="text-gradient-gold font-bold">Plano {currentProof.plan}</span>
+              </p>
+              <p className="text-[10px] text-muted-foreground font-body">
+                {currentProof.city} · há {currentProof.minutesAgo} min
+              </p>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>);
 
 }
