@@ -16,16 +16,33 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export function useNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>(
-    typeof Notification !== "undefined" ? Notification.permission : "default"
-  );
+  const [permission, setPermission] = useState<NotificationPermission>(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return "default";
+    return Notification.permission;
+  });
   const [enabled, setEnabled] = useState(() => {
-    return localStorage.getItem(NOTIFICATION_KEY) === "true";
+    // Only consider enabled if localStorage says so AND permission is granted
+    const stored = localStorage.getItem(NOTIFICATION_KEY) === "true";
+    if (stored && typeof window !== "undefined" && "Notification" in window) {
+      // Sync: if browser permission was revoked externally, update localStorage
+      if (Notification.permission !== "granted") {
+        localStorage.setItem(NOTIFICATION_KEY, "false");
+        return false;
+      }
+      return true;
+    }
+    return false;
   });
 
   useEffect(() => {
     if ("Notification" in window) {
-      setPermission(Notification.permission);
+      const current = Notification.permission;
+      setPermission(current);
+      // If permission was revoked, sync enabled state
+      if (current !== "granted" && enabled) {
+        localStorage.setItem(NOTIFICATION_KEY, "false");
+        setEnabled(false);
+      }
     }
   }, []);
 
