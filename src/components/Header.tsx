@@ -123,12 +123,12 @@ export default function Header() {
 
           {/* Notification bell with badge + dropdown */}
           <div className="relative" ref={notifRef}>
-            <button
+          <button
               onClick={handleBellClick}
-              className={`p-2 rounded-lg transition-colors relative ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              className={`p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors relative ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
               title="Notificações"
             >
-              {enabled ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+              {enabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
               {unreadCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {unreadCount > 9 ? "9+" : unreadCount}
