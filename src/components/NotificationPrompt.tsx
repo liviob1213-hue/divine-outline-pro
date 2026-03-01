@@ -24,18 +24,34 @@ export default function NotificationPrompt() {
     if (permission === "denied") return;
     if (localStorage.getItem(PROMPT_KEY)) return;
 
+    // On iOS, push only works in installed PWA (iOS 16.4+)
+    // Check if PushManager is available
+    if (!("PushManager" in window) || !("Notification" in window)) {
+      // Don't show the prompt if push isn't supported
+      return;
+    }
+
     // Small delay so the page loads first
     const timer = setTimeout(() => setOpen(true), 1500);
     return () => clearTimeout(timer);
   }, [enabled, permission]);
 
   const handleAllow = async () => {
+    // Always mark as dismissed so it doesn't keep reappearing
+    localStorage.setItem(PROMPT_KEY, "1");
+    
     try {
       const result = await requestPermission();
       if (result === "granted") {
         toast({
           title: "Notificações ativadas! 🔔",
           description: "Você receberá o versículo do dia às 8h.",
+        });
+      } else if (result === "denied") {
+        toast({
+          title: "Notificações bloqueadas",
+          description: "Você pode ativar depois nas configurações do navegador.",
+          variant: "destructive",
         });
       }
     } catch {
