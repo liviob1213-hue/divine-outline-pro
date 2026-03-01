@@ -7,190 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Web Push crypto utilities for Deno
-async function generatePushPayload(
-  subscription: { endpoint: string; p256dh: string; auth: string },
-  payload: string,
-  vapidPublicKey: string,
-  vapidPrivateKey: string
-) {
-  // Use the web-push approach with fetch directly
-  // For Deno, we'll use the simpler JWT-based VAPID approach
-  const audience = new URL(subscription.endpoint).origin;
-  
-  // Create VAPID JWT
-  const header = { typ: "JWT", alg: "ES256" };
-  const now = Math.floor(Date.now() / 1000);
-  const claims = {
-    aud: audience,
-    exp: now + 60 * 60 * 12,
-    sub: "mailto:contato@palavraai.site",
-  };
-
-  // Import the VAPID private key
-  const rawKey = base64UrlDecode(vapidPrivateKey);
-  const privateKey = await crypto.subtle.importKey(
-    "pkcs8",
-    rawKey,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["sign"]
-  );
-
-  const encodedHeader = base64UrlEncode(new TextEncoder().encode(JSON.stringify(header)));
-  const encodedPayload = base64UrlEncode(new TextEncoder().encode(JSON.stringify(claims)));
-  const unsignedToken = `${encodedHeader}.${encodedPayload}`;
-
-  const signature = await crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    privateKey,
-    new TextEncoder().encode(unsignedToken)
-  );
-
-  // Convert DER signature to raw r||s format
-  const rawSig = derToRaw(new Uint8Array(signature));
-  const encodedSignature = base64UrlEncode(rawSig);
-  const jwt = `${unsignedToken}.${encodedSignature}`;
-
-  // Encrypt the payload using the subscription keys
-  const encrypted = await encryptPayload(
-    payload,
-    subscription.p256dh,
-    subscription.auth
-  );
-
-  return { jwt, vapidPublicKey, encrypted };
-}
-
-function derToRaw(der: Uint8Array): Uint8Array {
-  // DER signature format: 0x30 [total-length] 0x02 [r-length] [r] 0x02 [s-length] [s]
-  const raw = new Uint8Array(64);
-  let offset = 2; // skip 0x30 and total length
-  
-  // Read r
-  offset++; // skip 0x02
-  let rLen = der[offset++];
-  let rStart = offset;
-  if (rLen === 33 && der[rStart] === 0) { rStart++; rLen--; }
-  raw.set(der.slice(rStart, rStart + Math.min(rLen, 32)), 32 - Math.min(rLen, 32));
-  offset = rStart + (der[offset - 1] === 33 ? 32 : rLen);
-  if (der[offset - 1] === 0) offset++;
-  
-  // Read s  
-  offset++; // skip 0x02
-  let sLen = der[offset++];
-  let sStart = offset;
-  if (sLen === 33 && der[sStart] === 0) { sStart++; sLen--; }
-  raw.set(der.slice(sStart, sStart + Math.min(sLen, 32)), 64 - Math.min(sLen, 32));
-  
-  return raw;
-}
-
-async function encryptPayload(
-  payload: string,
-  p256dhKey: string,
-  authSecret: string
-): Promise<Uint8Array> {
-  const payloadBytes = new TextEncoder().encode(payload);
-
-  // Import subscriber's public key
-  const subPubKeyBytes = base64UrlDecode(p256dhKey);
-  const subPubKey = await crypto.subtle.importKey(
-    "raw",
-    subPubKeyBytes,
-    { name: "ECDH", namedCurve: "P-256" },
-    false,
-    []
-  );
-
-  // Generate ephemeral key pair
-  const localKeyPair = await crypto.subtle.generateKey(
-    { name: "ECDH", namedCurve: "P-256" },
-    true,
-    ["deriveBits"]
-  );
-
-  // Derive shared secret
-  const sharedSecret = await crypto.subtle.deriveBits(
-    { name: "ECDH", public: subPubKey },
-    localKeyPair.privateKey,
-    256
-  );
-
-  const authBytes = base64UrlDecode(authSecret);
-  const localPubKeyBytes = await crypto.subtle.exportKey("raw", localKeyPair.publicKey);
-
-  // PRK
-  const ikm = new Uint8Array(sharedSecret);
-  const prk = await hmacSha256(new Uint8Array(authBytes), ikm);
-
-  // Derive content encryption key info
-  const cekInfo = createInfo("aesgcm", new Uint8Array(subPubKeyBytes), new Uint8Array(localPubKeyBytes));
-  const contentEncryptionKey = await hmacSha256(prk, concatBuffers(cekInfo, new Uint8Array([1])));
-  const cek = contentEncryptionKey.slice(0, 16);
-
-  // Derive nonce info
-  const nonceInfo = createInfo("nonce", new Uint8Array(subPubKeyBytes), new Uint8Array(localPubKeyBytes));
-  const nonceBytes = await hmacSha256(prk, concatBuffers(nonceInfo, new Uint8Array([1])));
-  const nonce = nonceBytes.slice(0, 12);
-
-  // Add padding
-  const padding = new Uint8Array(2);
-  const paddedPayload = concatBuffers(padding, payloadBytes);
-
-  // Encrypt
-  const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: nonce },
-    key,
-    paddedPayload
-  );
-
-  // Build the body: salt (16) + rs (4) + idlen (1) + keyid (65) + encrypted
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const rs = new Uint8Array(4);
-  new DataView(rs.buffer).setUint32(0, paddedPayload.byteLength + 16 + 1);
-  const idlen = new Uint8Array([65]);
-  const localPubBytes = new Uint8Array(localPubKeyBytes);
-
-  return concatBuffers(salt, rs, idlen, localPubBytes, new Uint8Array(encrypted));
-}
-
-function createInfo(type: string, clientPublicKey: Uint8Array, serverPublicKey: Uint8Array): Uint8Array {
-  const typeBytes = new TextEncoder().encode(type);
-  const result = concatBuffers(
-    new TextEncoder().encode("Content-Encoding: "),
-    typeBytes,
-    new Uint8Array([0]),
-    new TextEncoder().encode("P-256"),
-    new Uint8Array([0]),
-    new Uint8Array([0, clientPublicKey.length]),
-    clientPublicKey,
-    new Uint8Array([0, serverPublicKey.length]),
-    serverPublicKey
-  );
-  return result;
-}
-
-async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  const sig = await crypto.subtle.sign("HMAC", cryptoKey, data);
-  return new Uint8Array(sig);
-}
-
-function concatBuffers(...buffers: Uint8Array[]): Uint8Array {
-  const totalLen = buffers.reduce((sum, b) => sum + b.length, 0);
-  const result = new Uint8Array(totalLen);
-  let offset = 0;
-  for (const buf of buffers) {
-    result.set(buf, offset);
-    offset += buf.length;
-  }
-  return result;
-}
-
+// ─── Base64URL helpers ─────────────────────────────
 function base64UrlEncode(data: Uint8Array): string {
   let binary = "";
   for (const byte of data) binary += String.fromCharCode(byte);
@@ -205,6 +22,220 @@ function base64UrlDecode(str: string): Uint8Array {
   return bytes;
 }
 
+function concatBuffers(...buffers: Uint8Array[]): Uint8Array {
+  const totalLen = buffers.reduce((sum, b) => sum + b.length, 0);
+  const result = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const buf of buffers) {
+    result.set(buf, offset);
+    offset += buf.length;
+  }
+  return result;
+}
+
+// ─── HMAC-SHA256 ───────────────────────────────────
+async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  return new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, data));
+}
+
+// ─── HKDF ──────────────────────────────────────────
+async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
+  const prk = await hmacSha256(salt.length ? salt : new Uint8Array(32), ikm);
+  const infoAndOne = concatBuffers(info, new Uint8Array([1]));
+  const okm = await hmacSha256(prk, infoAndOne);
+  return okm.slice(0, length);
+}
+
+// ─── Create info for HKDF ──────────────────────────
+function createInfo(type: string, clientPub: Uint8Array, serverPub: Uint8Array): Uint8Array {
+  const encoder = new TextEncoder();
+  return concatBuffers(
+    encoder.encode("Content-Encoding: "),
+    encoder.encode(type),
+    new Uint8Array([0]),
+    encoder.encode("P-256"),
+    new Uint8Array([0]),
+    new Uint8Array([(clientPub.length >> 8) & 0xff, clientPub.length & 0xff]),
+    clientPub,
+    new Uint8Array([(serverPub.length >> 8) & 0xff, serverPub.length & 0xff]),
+    serverPub,
+  );
+}
+
+// ─── VAPID JWT ─────────────────────────────────────
+async function createVapidJwt(audience: string, vapidPrivateKeyB64: string): Promise<string> {
+  // VAPID private key is 32 bytes raw EC private key in base64url
+  const rawPrivateKey = base64UrlDecode(vapidPrivateKeyB64);
+  
+  // We need to construct a JWK from the raw 32-byte private key
+  // First generate a temporary key to get the public key, but we actually need to import as JWK
+  // The raw private key is the "d" parameter in JWK format
+  const jwk = {
+    kty: "EC",
+    crv: "P-256",
+    d: vapidPrivateKeyB64,
+    // We need x and y - derive them by generating a key pair and importing
+    // Actually, for signing we only need the private key
+    // Let's use a different approach: import via raw PKCS8
+  };
+
+  // Build PKCS8 from raw 32-byte private key
+  // PKCS8 header for P-256: 
+  const pkcs8Header = new Uint8Array([
+    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13, 0x06,
+    0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
+    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03,
+    0x01, 0x07, 0x04, 0x27, 0x30, 0x25, 0x02, 0x01,
+    0x01, 0x04, 0x20
+  ]);
+  const pkcs8 = concatBuffers(pkcs8Header, rawPrivateKey);
+
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    pkcs8,
+    { name: "ECDSA", namedCurve: "P-256" },
+    false,
+    ["sign"]
+  );
+
+  const header = { typ: "JWT", alg: "ES256" };
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    aud: audience,
+    exp: now + 60 * 60 * 12,
+    sub: "mailto:contato@palavraai.site",
+  };
+
+  const encodedHeader = base64UrlEncode(new TextEncoder().encode(JSON.stringify(header)));
+  const encodedPayload = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const unsignedToken = `${encodedHeader}.${encodedPayload}`;
+
+  const signature = new Uint8Array(await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    privateKey,
+    new TextEncoder().encode(unsignedToken)
+  ));
+
+  // Convert DER to raw r||s (64 bytes)
+  const rawSig = derToRaw(signature);
+  return `${unsignedToken}.${base64UrlEncode(rawSig)}`;
+}
+
+function derToRaw(der: Uint8Array): Uint8Array {
+  const raw = new Uint8Array(64);
+  // DER: 0x30 [len] 0x02 [rLen] [r...] 0x02 [sLen] [s...]
+  let pos = 2; // skip 0x30 + total length
+  
+  // R
+  pos++; // skip 0x02
+  const rLen = der[pos++];
+  const rBytes = der.slice(pos, pos + rLen);
+  pos += rLen;
+  // Remove leading zero if present, right-pad to 32
+  const rTrimmed = rBytes[0] === 0 && rLen > 32 ? rBytes.slice(1) : rBytes;
+  raw.set(rTrimmed, 32 - rTrimmed.length);
+
+  // S
+  pos++; // skip 0x02
+  const sLen = der[pos++];
+  const sBytes = der.slice(pos, pos + sLen);
+  const sTrimmed = sBytes[0] === 0 && sLen > 32 ? sBytes.slice(1) : sBytes;
+  raw.set(sTrimmed, 64 - sTrimmed.length);
+
+  return raw;
+}
+
+// ─── Encrypt push payload (aesgcm) ────────────────
+async function encryptPushPayload(
+  payloadText: string,
+  p256dhB64: string,
+  authB64: string
+): Promise<{ ciphertext: Uint8Array; salt: Uint8Array; localPublicKey: Uint8Array }> {
+  const payloadBytes = new TextEncoder().encode(payloadText);
+  const authBytes = base64UrlDecode(authB64);
+  const subPubBytes = base64UrlDecode(p256dhB64);
+
+  // Import subscriber's public key
+  const subPubKey = await crypto.subtle.importKey(
+    "raw", subPubBytes, { name: "ECDH", namedCurve: "P-256" }, false, []
+  );
+
+  // Generate ephemeral key pair for this message
+  const localKeyPair = await crypto.subtle.generateKey(
+    { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]
+  );
+
+  // ECDH shared secret
+  const sharedSecret = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: "ECDH", public: subPubKey }, localKeyPair.privateKey, 256
+  ));
+
+  const localPubBytes = new Uint8Array(await crypto.subtle.exportKey("raw", localKeyPair.publicKey));
+
+  // IKM = HKDF(auth, sharedSecret, "Content-Encoding: auth\0", 32)
+  const authInfo = new TextEncoder().encode("Content-Encoding: auth\0");
+  const ikm = await hkdf(authBytes, sharedSecret, authInfo, 32);
+
+  // Generate 16-byte salt
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  // CEK = HKDF(salt, ikm, cekInfo, 16)
+  const cekInfo = createInfo("aesgcm", subPubBytes, localPubBytes);
+  const cek = await hkdf(salt, ikm, cekInfo, 16);
+
+  // Nonce = HKDF(salt, ikm, nonceInfo, 12)
+  const nonceInfo = createInfo("nonce", subPubBytes, localPubBytes);
+  const nonce = await hkdf(salt, ikm, nonceInfo, 12);
+
+  // Pad payload (2-byte BE padding length + padding + payload)
+  const paddingLen = 0;
+  const padded = concatBuffers(
+    new Uint8Array([(paddingLen >> 8) & 0xff, paddingLen & 0xff]),
+    payloadBytes
+  );
+
+  // AES-128-GCM encrypt
+  const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const encrypted = new Uint8Array(await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: nonce }, key, padded
+  ));
+
+  return { ciphertext: encrypted, salt, localPublicKey: localPubBytes };
+}
+
+// ─── Send one push notification ────────────────────
+async function sendPush(
+  sub: { endpoint: string; p256dh: string; auth: string },
+  payload: string,
+  vapidPublicKey: string,
+  vapidPrivateKey: string
+): Promise<{ status: number; body: string }> {
+  const audience = new URL(sub.endpoint).origin;
+  const jwt = await createVapidJwt(audience, vapidPrivateKey);
+  const { ciphertext, salt, localPublicKey } = await encryptPushPayload(payload, sub.p256dh, sub.auth);
+
+  const resp = await fetch(sub.endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/octet-stream",
+      "Content-Encoding": "aesgcm",
+      "Encryption": `salt=${base64UrlEncode(salt)}`,
+      "Crypto-Key": `dh=${base64UrlEncode(localPublicKey)};p256ecdsa=${vapidPublicKey}`,
+      "Authorization": `vapid t=${jwt}, k=${vapidPublicKey}`,
+      "TTL": "86400",
+      "Urgency": "normal",
+    },
+    body: ciphertext,
+  });
+
+  const body = await resp.text();
+  return { status: resp.status, body };
+}
+
+// ─── Main handler ──────────────────────────────────
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -224,8 +255,7 @@ serve(async (req) => {
 
     let hash = 0;
     for (let i = 0; i < dateStr.length; i++) {
-      const char = dateStr.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
       hash |= 0;
     }
     const seed = Math.abs(hash);
@@ -270,6 +300,14 @@ serve(async (req) => {
       verseRef = fb.ref;
     }
 
+    // Save notification to in_app_notifications table
+    await supabase.from("in_app_notifications").insert({
+      title: "📖 Versículo do Dia",
+      body: `"${verseText.slice(0, 150)}${verseText.length > 150 ? "..." : ""}" — ${verseRef}`,
+      type: "daily-verse",
+      data: { url: "/", verse: verseRef },
+    });
+
     // Get all push subscriptions
     const { data: subscriptions, error: subError } = await supabase
       .from("push_subscriptions")
@@ -294,36 +332,21 @@ serve(async (req) => {
 
     for (const sub of subscriptions || []) {
       try {
-        const { jwt, encrypted } = await generatePushPayload(
+        const result = await sendPush(
           { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
           notificationPayload,
           vapidPublicKey,
           vapidPrivateKey
         );
 
-        const localPubKeyBytes = encrypted.slice(21, 86);
-        const encryptedPayload = encrypted;
+        console.log(`Push to ${sub.endpoint.slice(0, 60)}...: ${result.status} ${result.body.slice(0, 200)}`);
 
-        const resp = await fetch(sub.endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/octet-stream",
-            "Content-Encoding": "aesgcm",
-            "Crypto-Key": `dh=${base64UrlEncode(localPubKeyBytes)};p256ecdsa=${vapidPublicKey}`,
-            Authorization: `vapid t=${jwt}, k=${vapidPublicKey}`,
-            TTL: "86400",
-            Urgency: "normal",
-          },
-          body: encryptedPayload,
-        });
-
-        if (resp.status === 201 || resp.status === 200) {
+        if (result.status === 201 || result.status === 200) {
           sent++;
-        } else if (resp.status === 404 || resp.status === 410) {
+        } else if (result.status === 404 || result.status === 410) {
           staleEndpoints.push(sub.endpoint);
           failed++;
         } else {
-          console.error(`Push failed for ${sub.endpoint}: ${resp.status} ${await resp.text()}`);
           failed++;
         }
       } catch (e) {
@@ -334,22 +357,12 @@ serve(async (req) => {
 
     // Clean up stale subscriptions
     if (staleEndpoints.length > 0) {
-      await supabase
-        .from("push_subscriptions")
-        .delete()
-        .in("endpoint", staleEndpoints);
+      await supabase.from("push_subscriptions").delete().in("endpoint", staleEndpoints);
       console.log(`Cleaned ${staleEndpoints.length} stale subscriptions`);
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        date: dateStr,
-        verse: verseRef,
-        sent,
-        failed,
-        total: subscriptions?.length || 0,
-      }),
+      JSON.stringify({ success: true, date: dateStr, verse: verseRef, sent, failed, total: subscriptions?.length || 0 }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
