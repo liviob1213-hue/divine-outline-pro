@@ -66,40 +66,29 @@ function createInfo(type: string, clientPub: Uint8Array, serverPub: Uint8Array):
 }
 
 // ─── VAPID JWT ─────────────────────────────────────
-async function createVapidJwt(audience: string, vapidPrivateKeyB64: string): Promise<string> {
-  // VAPID private key is 32 bytes raw EC private key in base64url
+async function createVapidJwt(audience: string, vapidPrivateKeyB64: string, vapidPublicKeyB64: string): Promise<string> {
   const rawPrivateKey = base64UrlDecode(vapidPrivateKeyB64);
+  const rawPublicKey = base64UrlDecode(vapidPublicKeyB64);
   
-  // We need to construct a JWK from the raw 32-byte private key
-  // First generate a temporary key to get the public key, but we actually need to import as JWK
-  // The raw private key is the "d" parameter in JWK format
-  const jwk = {
-    kty: "EC",
-    crv: "P-256",
-    d: vapidPrivateKeyB64,
-    // We need x and y - derive them by generating a key pair and importing
-    // Actually, for signing we only need the private key
-    // Let's use a different approach: import via raw PKCS8
-  };
+  
+  
+  // Public key is 65 bytes: 0x04 || x (32) || y (32)
+  const x = base64UrlEncode(rawPublicKey.slice(1, 33));
+  const y = base64UrlEncode(rawPublicKey.slice(33, 65));
+  const d = base64UrlEncode(rawPrivateKey);
 
-  // Build PKCS8 from raw 32-byte private key
-  // PKCS8 header for P-256: 
-  const pkcs8Header = new Uint8Array([
-    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13, 0x06,
-    0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03,
-    0x01, 0x07, 0x04, 0x27, 0x30, 0x25, 0x02, 0x01,
-    0x01, 0x04, 0x20
-  ]);
-  const pkcs8 = concatBuffers(pkcs8Header, rawPrivateKey);
+  const jwk = { kty: "EC", crv: "P-256", x, y, d, ext: true };
+  
 
   const privateKey = await crypto.subtle.importKey(
-    "pkcs8",
-    pkcs8,
+    "jwk",
+    jwk,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"]
   );
+
+  
 
   const header = { typ: "JWT", alg: "ES256" };
   const now = Math.floor(Date.now() / 1000);
@@ -119,8 +108,8 @@ async function createVapidJwt(audience: string, vapidPrivateKeyB64: string): Pro
     new TextEncoder().encode(unsignedToken)
   ));
 
-  // Convert DER to raw r||s (64 bytes)
-  const rawSig = derToRaw(signature);
+  // Deno returns raw r||s (64 bytes), not DER — use directly if 64 bytes
+  const rawSig = signature.length === 64 ? signature : derToRaw(signature);
   return `${unsignedToken}.${base64UrlEncode(rawSig)}`;
 }
 
@@ -214,7 +203,7 @@ async function sendPush(
   vapidPrivateKey: string
 ): Promise<{ status: number; body: string }> {
   const audience = new URL(sub.endpoint).origin;
-  const jwt = await createVapidJwt(audience, vapidPrivateKey);
+  const jwt = await createVapidJwt(audience, vapidPrivateKey, vapidPublicKey);
   const { ciphertext, salt, localPublicKey } = await encryptPushPayload(payload, sub.p256dh, sub.auth);
 
   const resp = await fetch(sub.endpoint, {
@@ -300,13 +289,22 @@ serve(async (req) => {
       verseRef = fb.ref;
     }
 
-    // Save notification to in_app_notifications table
-    await supabase.from("in_app_notifications").insert({
-      title: "📖 Versículo do Dia",
-      body: `"${verseText.slice(0, 150)}${verseText.length > 150 ? "..." : ""}" — ${verseRef}`,
-      type: "daily-verse",
-      data: { url: "/", verse: verseRef },
-    });
+    // Save notification to in_app_notifications (deduplicate per day)
+    const { data: existingNotif } = await supabase
+      .from("in_app_notifications")
+      .select("id")
+      .eq("type", "daily-verse")
+      .gte("created_at", `${dateStr}T00:00:00Z`)
+      .limit(1);
+
+    if (!existingNotif?.length) {
+      await supabase.from("in_app_notifications").insert({
+        title: "📖 Versículo do Dia",
+        body: `"${verseText.slice(0, 150)}${verseText.length > 150 ? "..." : ""}" — ${verseRef}`,
+        type: "daily-verse",
+        data: { url: "/", verse: verseRef },
+      });
+    }
 
     // Get all push subscriptions
     const { data: subscriptions, error: subError } = await supabase

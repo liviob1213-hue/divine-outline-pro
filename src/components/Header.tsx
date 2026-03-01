@@ -1,8 +1,9 @@
 import { Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
 const logoPregai = "/logo-palavraai.png";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useInAppNotifications } from "@/hooks/use-in-app-notifications";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -22,7 +23,10 @@ export default function Header() {
   });
 
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const { permission, enabled, requestPermission, disableNotifications } = useNotifications();
+  const { notifications, unreadCount, markAllRead } = useInAppNotifications();
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -49,6 +53,17 @@ export default function Header() {
     }
   }, []);
 
+  // Close notification panel on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifPanel(false);
+      }
+    };
+    if (showNotifPanel) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showNotifPanel]);
+
   const handleToggleNotification = async () => {
     if (enabled) {
       disableNotifications();
@@ -56,13 +71,11 @@ export default function Header() {
       return;
     }
 
-    // If already denied, show instructions dialog
     if (permission === "denied") {
       setShowPermissionDialog(true);
       return;
     }
 
-    // Check if Notification API exists
     if (!("Notification" in window)) {
       setShowPermissionDialog(true);
       return;
@@ -80,6 +93,13 @@ export default function Header() {
     } catch {
       setShowPermissionDialog(true);
     }
+  };
+
+  const handleBellClick = () => {
+    setShowNotifPanel((prev) => {
+      if (!prev) markAllRead();
+      return !prev;
+    });
   };
 
   return (
@@ -100,13 +120,54 @@ export default function Header() {
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
-          <button
-            onClick={handleToggleNotification}
-            className={`p-2 rounded-lg transition-colors ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-            title={enabled ? "Desativar notificações" : "Ativar notificações diárias"}
-          >
-            {enabled ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
-          </button>
+
+          {/* Notification bell with badge + dropdown */}
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={handleBellClick}
+              className={`p-2 rounded-lg transition-colors relative ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              title="Notificações"
+            >
+              {enabled ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {showNotifPanel && (
+              <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-card border border-border rounded-xl shadow-xl z-50">
+                <div className="p-3 border-b border-border flex items-center justify-between">
+                  <h3 className="font-display font-bold text-sm text-foreground">Notificações</h3>
+                  {!enabled && (
+                    <button
+                      onClick={handleToggleNotification}
+                      className="text-[10px] font-body font-semibold text-primary hover:underline"
+                    >
+                      Ativar Push
+                    </button>
+                  )}
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="p-6 text-center text-sm text-muted-foreground font-body">
+                    Nenhuma notificação ainda.
+                  </div>
+                ) : (
+                  notifications.map((n) => (
+                    <div key={n.id} className="p-3 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors">
+                      <p className="text-xs font-body font-semibold text-foreground">{n.title}</p>
+                      <p className="text-xs text-muted-foreground font-body mt-0.5 leading-relaxed">{n.body}</p>
+                      <p className="text-[10px] text-muted-foreground font-body mt-1">
+                        {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleLogout}
             className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
