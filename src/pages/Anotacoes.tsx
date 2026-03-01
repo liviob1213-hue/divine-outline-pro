@@ -43,7 +43,7 @@ export default function Anotacoes() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-2xl mx-auto px-4 pt-4">
+      <div className="max-w-2xl mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Link to="/" className="p-2 -ml-2 rounded-lg hover:bg-muted transition-colors">

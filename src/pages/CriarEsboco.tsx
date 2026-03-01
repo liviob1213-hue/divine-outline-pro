@@ -229,7 +229,7 @@ Crie de **3 a 5 tópicos principais numerados** (1, 2, 3...). Para CADA tópico:
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-4xl mx-auto px-4 pt-4">
+      <div className="max-w-4xl mx-auto px-4 pt-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
