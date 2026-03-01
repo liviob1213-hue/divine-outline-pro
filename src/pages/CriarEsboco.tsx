@@ -126,25 +126,30 @@ ${extraInstructions ? `- Instruções extras: ${extraInstructions}` : ""}
 ## 🎯 TEMA: [Tema da pregação]
 
 ## 📖 INTRODUÇÃO
-- Comece definindo os termos-chave do tema (ex: "O que é confiança?", "O que significa Messias?", "Quantos tipos de amor existem?"). Use definições claras e acessíveis.
+- Comece definindo os termos-chave do tema (ex: "O que é temer a Deus?", "O que é confiança?", "O que significa Messias?", "Quantos tipos de amor existem?"). Use definições claras, acessíveis e com base bíblica.
+- Se o tema tiver categorias ou tipos, liste-os na introdução (ex: "Tipos de temor na Bíblia", "Tipos de amor", "Aspectos da fé"). Cada tipo deve vir acompanhado de uma breve explicação e versículo por extenso.
 - Apresente o contexto do livro bíblico: quem escreveu, para quem, divisão do livro, época.
 - Dê um panorama geral da passagem e dos principais pontos que serão abordados.
 - Traga versículos bíblicos já na introdução que sustentem o contexto apresentado, sempre escritos POR EXTENSO.
 
 ## 📝 DESENVOLVIMENTO
 Crie de **3 a 5 tópicos principais numerados** (1, 2, 3...). Para CADA tópico:
-- Dê um título claro e objetivo ao tópico.
-- Dentro de cada tópico, crie **no mínimo 4 a 6 subtópicos** detalhados.
+- Dê um título claro e objetivo ao tópico (exemplos de bons títulos: "Homens que temeram a Deus", "Os benefícios de temer a Deus", "Como posso temer a Deus?", "Deus nos convida a depositar a fé nEle", "Que dizem os homens acerca de Jesus?").
+- Dentro de cada tópico, crie **no mínimo 4 a 6 subtópicos** detalhados e numerados.
 - **REGRA CRUCIAL**: Em CADA subtópico, inclua pelo menos 1 versículo bíblico ESCRITO POR EXTENSO (não apenas a referência). Exemplo: *Romanos 10:17 "De sorte que a fé é pelo ouvir, e o ouvir pela palavra de Deus."*
 - Os versículos devem ter LIGAÇÃO DIRETA com o subtópico e com o tema central da pregação.
+- Quando o tópico for sobre personagens bíblicos, traga o nome, uma breve descrição do seu exemplo e o versículo-chave por extenso (ex: "Abraão — foi chamado amigo de Deus... Gênesis 22:12").
+- Quando o tópico for sobre benefícios ou promessas, traga uma lista rica de versículos, cada um com sua referência e texto completo.
+- Quando o tópico for sobre "Como fazer" (ex: "Como posso temer a Deus?"), traga subtópicos práticos (oração, santidade, vida no altar, obediência) com versículos de apoio.
 - Traga aplicações práticas dentro dos subtópicos quando pertinente.
 - Use linguagem pastoral, didática e acessível.
 - Quando possível, faça conexões entre Antigo e Novo Testamento.
-- Inclua listas quando apropriado (como "Quem é Jesus?" com múltiplos versículos de João, ou "Aspectos da fé" com exemplos bíblicos).
+- Inclua listas quando apropriado (como "Quem é Jesus?" com múltiplos versículos, ou "Benefícios de temer a Deus" com sequência de Salmos).
+- Você tem liberdade de criar tópicos e subtópicos adicionais e desenvolver cada um deles com profundidade e referências bíblicas.
 
 ## ✅ CONCLUSÃO
 - Faça uma exortação pessoal e direta ao ouvinte.
-- Traga um versículo final impactante ESCRITO POR EXTENSO que resuma toda a mensagem.
+- Traga de 2 a 3 versículos finais impactantes ESCRITOS POR EXTENSO que resumam toda a mensagem.
 - Convide à reflexão e à decisão prática.
 
 **REGRAS DE ESTILO (SIGA RIGOROSAMENTE):**
@@ -152,9 +157,10 @@ Crie de **3 a 5 tópicos principais numerados** (1, 2, 3...). Para CADA tópico:
 2. Nunca coloque apenas a referência bíblica — sempre escreva o texto do versículo completo entre aspas.
 3. Use negrito para termos-chave e nomes de conceitos teológicos.
 4. A estrutura deve ser organizada e visualmente clara com numeração e subtítulos.
-5. O esboço deve ser EXTENSO e DETALHADO, com riqueza de referências bíblicas cruzadas.
-6. Traga versículos de diferentes livros da Bíblia para enriquecer cada ponto.
-7. A linguagem deve ser pastoral — como se estivesse ensinando a uma congregação real.`;
+5. O esboço deve ser EXTENSO e DETALHADO, com riqueza de referências bíblicas cruzadas de diferentes livros.
+6. Traga versículos de diferentes livros da Bíblia (Salmos, Provérbios, Evangelhos, Epístolas, etc.) para enriquecer cada ponto.
+7. A linguagem deve ser pastoral — como se estivesse ensinando a uma congregação real.
+8. Varie os tipos de tópicos: personagens bíblicos, benefícios/promessas, definições teológicas, aplicação prática, listas de versículos temáticos.`;
 
     try {
       await streamAI(
