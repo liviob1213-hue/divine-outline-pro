@@ -33,7 +33,6 @@ function concatBuffers(...buffers: Uint8Array[]): Uint8Array {
   return result;
 }
 
-// ─── HMAC-SHA256 ───────────────────────────────────
 async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
   const cryptoKey = await crypto.subtle.importKey(
     "raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
@@ -41,7 +40,6 @@ async function hmacSha256(key: Uint8Array, data: Uint8Array): Promise<Uint8Array
   return new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, data));
 }
 
-// ─── HKDF ──────────────────────────────────────────
 async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
   const prk = await hmacSha256(salt.length ? salt : new Uint8Array(32), ikm);
   const infoAndOne = concatBuffers(info, new Uint8Array([1]));
@@ -49,19 +47,14 @@ async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length:
   return okm.slice(0, length);
 }
 
-// ─── Create info for HKDF ──────────────────────────
-function createInfo(type: string, clientPub: Uint8Array, serverPub: Uint8Array): Uint8Array {
+// ─── RFC 8188 / 8291 info creation (aes128gcm) ────
+function createInfoAes128gcm(type: string, context: Uint8Array): Uint8Array {
   const encoder = new TextEncoder();
   return concatBuffers(
     encoder.encode("Content-Encoding: "),
     encoder.encode(type),
     new Uint8Array([0]),
-    encoder.encode("P-256"),
-    new Uint8Array([0]),
-    new Uint8Array([(clientPub.length >> 8) & 0xff, clientPub.length & 0xff]),
-    clientPub,
-    new Uint8Array([(serverPub.length >> 8) & 0xff, serverPub.length & 0xff]),
-    serverPub,
+    context,
   );
 }
 
@@ -69,26 +62,16 @@ function createInfo(type: string, clientPub: Uint8Array, serverPub: Uint8Array):
 async function createVapidJwt(audience: string, vapidPrivateKeyB64: string, vapidPublicKeyB64: string): Promise<string> {
   const rawPrivateKey = base64UrlDecode(vapidPrivateKeyB64);
   const rawPublicKey = base64UrlDecode(vapidPublicKeyB64);
-  
-  
-  
-  // Public key is 65 bytes: 0x04 || x (32) || y (32)
+
   const x = base64UrlEncode(rawPublicKey.slice(1, 33));
   const y = base64UrlEncode(rawPublicKey.slice(33, 65));
   const d = base64UrlEncode(rawPrivateKey);
 
   const jwk = { kty: "EC", crv: "P-256", x, y, d, ext: true };
-  
 
   const privateKey = await crypto.subtle.importKey(
-    "jwk",
-    jwk,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["sign"]
+    "jwk", jwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]
   );
-
-  
 
   const header = { typ: "JWT", alg: "ES256" };
   const now = Math.floor(Date.now() / 1000);
@@ -108,83 +91,68 @@ async function createVapidJwt(audience: string, vapidPrivateKeyB64: string, vapi
     new TextEncoder().encode(unsignedToken)
   ));
 
-  // Deno returns raw r||s (64 bytes), not DER — use directly if 64 bytes
   const rawSig = signature.length === 64 ? signature : derToRaw(signature);
   return `${unsignedToken}.${base64UrlEncode(rawSig)}`;
 }
 
 function derToRaw(der: Uint8Array): Uint8Array {
   const raw = new Uint8Array(64);
-  // DER: 0x30 [len] 0x02 [rLen] [r...] 0x02 [sLen] [s...]
-  let pos = 2; // skip 0x30 + total length
-  
-  // R
-  pos++; // skip 0x02
+  let pos = 2;
+  pos++;
   const rLen = der[pos++];
   const rBytes = der.slice(pos, pos + rLen);
   pos += rLen;
-  // Remove leading zero if present, right-pad to 32
   const rTrimmed = rBytes[0] === 0 && rLen > 32 ? rBytes.slice(1) : rBytes;
   raw.set(rTrimmed, 32 - rTrimmed.length);
-
-  // S
-  pos++; // skip 0x02
+  pos++;
   const sLen = der[pos++];
   const sBytes = der.slice(pos, pos + sLen);
   const sTrimmed = sBytes[0] === 0 && sLen > 32 ? sBytes.slice(1) : sBytes;
   raw.set(sTrimmed, 64 - sTrimmed.length);
-
   return raw;
 }
 
-// ─── Encrypt push payload (aesgcm) ────────────────
+// ─── Encrypt push payload (aes128gcm - RFC 8291) ──
 async function encryptPushPayload(
   payloadText: string,
   p256dhB64: string,
   authB64: string
-): Promise<{ ciphertext: Uint8Array; salt: Uint8Array; localPublicKey: Uint8Array }> {
+): Promise<{ body: Uint8Array; localPublicKey: Uint8Array }> {
   const payloadBytes = new TextEncoder().encode(payloadText);
   const authBytes = base64UrlDecode(authB64);
   const subPubBytes = base64UrlDecode(p256dhB64);
 
-  // Import subscriber's public key
   const subPubKey = await crypto.subtle.importKey(
     "raw", subPubBytes, { name: "ECDH", namedCurve: "P-256" }, false, []
   );
 
-  // Generate ephemeral key pair for this message
   const localKeyPair = await crypto.subtle.generateKey(
     { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]
   );
 
-  // ECDH shared secret
   const sharedSecret = new Uint8Array(await crypto.subtle.deriveBits(
     { name: "ECDH", public: subPubKey }, localKeyPair.privateKey, 256
   ));
 
   const localPubBytes = new Uint8Array(await crypto.subtle.exportKey("raw", localKeyPair.publicKey));
 
-  // IKM = HKDF(auth, sharedSecret, "Content-Encoding: auth\0", 32)
-  const authInfo = new TextEncoder().encode("Content-Encoding: auth\0");
-  const ikm = await hkdf(authBytes, sharedSecret, authInfo, 32);
+  // RFC 8291: IKM via auth secret
+  const keyInfoAuth = new TextEncoder().encode("WebPush: info\0");
+  const ikm_info = concatBuffers(keyInfoAuth, subPubBytes, localPubBytes);
+  const ikm = await hkdf(authBytes, sharedSecret, ikm_info, 32);
 
   // Generate 16-byte salt
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
-  // CEK = HKDF(salt, ikm, cekInfo, 16)
-  const cekInfo = createInfo("aesgcm", subPubBytes, localPubBytes);
+  // CEK and nonce using aes128gcm content encoding
+  const cekInfo = createInfoAes128gcm("aes128gcm", new Uint8Array(0));
   const cek = await hkdf(salt, ikm, cekInfo, 16);
 
-  // Nonce = HKDF(salt, ikm, nonceInfo, 12)
-  const nonceInfo = createInfo("nonce", subPubBytes, localPubBytes);
+  const nonceInfo = createInfoAes128gcm("nonce", new Uint8Array(0));
   const nonce = await hkdf(salt, ikm, nonceInfo, 12);
 
-  // Pad payload (2-byte BE padding length + padding + payload)
-  const paddingLen = 0;
-  const padded = concatBuffers(
-    new Uint8Array([(paddingLen >> 8) & 0xff, paddingLen & 0xff]),
-    payloadBytes
-  );
+  // RFC 8188: payload + delimiter (0x02) for last record
+  const padded = concatBuffers(payloadBytes, new Uint8Array([2]));
 
   // AES-128-GCM encrypt
   const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
@@ -192,7 +160,19 @@ async function encryptPushPayload(
     { name: "AES-GCM", iv: nonce }, key, padded
   ));
 
-  return { ciphertext: encrypted, salt, localPublicKey: localPubBytes };
+  // RFC 8188 header: salt (16) + rs (4) + idlen (1) + keyid (65)
+  const rs = new Uint8Array(4);
+  const rsView = new DataView(rs.buffer);
+  rsView.setUint32(0, 4096);
+
+  const header = concatBuffers(
+    salt,
+    rs,
+    new Uint8Array([65]), // keyid length = 65 bytes (uncompressed P-256)
+    localPubBytes,
+  );
+
+  return { body: concatBuffers(header, encrypted), localPublicKey: localPubBytes };
 }
 
 // ─── Send one push notification ────────────────────
@@ -204,28 +184,27 @@ async function sendPush(
 ): Promise<{ status: number; body: string }> {
   const audience = new URL(sub.endpoint).origin;
   const jwt = await createVapidJwt(audience, vapidPrivateKey, vapidPublicKey);
-  const { ciphertext, salt, localPublicKey } = await encryptPushPayload(payload, sub.p256dh, sub.auth);
+  const { body: encryptedBody } = await encryptPushPayload(payload, sub.p256dh, sub.auth);
 
   const resp = await fetch(sub.endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Encoding": "aesgcm",
-      "Encryption": `salt=${base64UrlEncode(salt)}`,
-      "Crypto-Key": `dh=${base64UrlEncode(localPublicKey)};p256ecdsa=${vapidPublicKey}`,
+      "Content-Encoding": "aes128gcm",
       "Authorization": `vapid t=${jwt}, k=${vapidPublicKey}`,
       "TTL": "86400",
       "Urgency": "normal",
+      "Content-Length": String(encryptedBody.length),
     },
-    body: ciphertext,
+    body: encryptedBody,
   });
 
-  const body = await resp.text();
-  return { status: resp.status, body };
+  const respBody = await resp.text();
+  return { status: resp.status, body: respBody };
 }
 
 // ─── Main handler ──────────────────────────────────
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -236,6 +215,10 @@ serve(async (req) => {
     const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY")!;
     const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    console.log("send-daily-verse: Starting...");
+    console.log("VAPID public key length:", vapidPublicKey.length);
+    console.log("VAPID private key length:", vapidPrivateKey.length);
 
     // Get daily verse
     const now = new Date();
@@ -256,6 +239,8 @@ serve(async (req) => {
       .from("biblias")
       .select("id", { count: "exact", head: true })
       .eq("versao", "ARA");
+
+    console.log("Bible verse count:", count);
 
     if (count && count > 0) {
       const offset = seed % count;
@@ -289,6 +274,8 @@ serve(async (req) => {
       verseRef = fb.ref;
     }
 
+    console.log("Verse:", verseRef);
+
     // Save notification to in_app_notifications (deduplicate per day)
     const { data: existingNotif } = await supabase
       .from("in_app_notifications")
@@ -298,12 +285,15 @@ serve(async (req) => {
       .limit(1);
 
     if (!existingNotif?.length) {
-      await supabase.from("in_app_notifications").insert({
+      const { error: insertError } = await supabase.from("in_app_notifications").insert({
         title: "📖 Versículo do Dia",
         body: `"${verseText.slice(0, 150)}${verseText.length > 150 ? "..." : ""}" — ${verseRef}`,
         type: "daily-verse",
         data: { url: "/", verse: verseRef },
       });
+      if (insertError) console.error("Insert notification error:", insertError);
+    } else {
+      console.log("In-app notification already exists for today");
     }
 
     // Get all push subscriptions
@@ -330,6 +320,7 @@ serve(async (req) => {
 
     for (const sub of subscriptions || []) {
       try {
+        console.log(`Sending push to: ${sub.endpoint.slice(0, 80)}...`);
         const result = await sendPush(
           { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
           notificationPayload,
@@ -337,7 +328,7 @@ serve(async (req) => {
           vapidPrivateKey
         );
 
-        console.log(`Push to ${sub.endpoint.slice(0, 60)}...: ${result.status} ${result.body.slice(0, 200)}`);
+        console.log(`Push result: status=${result.status}, body=${result.body.slice(0, 300)}`);
 
         if (result.status === 201 || result.status === 200) {
           sent++;
@@ -345,6 +336,7 @@ serve(async (req) => {
           staleEndpoints.push(sub.endpoint);
           failed++;
         } else {
+          console.error(`Push failed with status ${result.status}: ${result.body}`);
           failed++;
         }
       } catch (e) {
@@ -359,14 +351,17 @@ serve(async (req) => {
       console.log(`Cleaned ${staleEndpoints.length} stale subscriptions`);
     }
 
+    const response = { success: true, date: dateStr, verse: verseRef, sent, failed, total: subscriptions?.length || 0 };
+    console.log("send-daily-verse result:", JSON.stringify(response));
+
     return new Response(
-      JSON.stringify({ success: true, date: dateStr, verse: verseRef, sent, failed, total: subscriptions?.length || 0 }),
+      JSON.stringify(response),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
     console.error("send-daily-verse error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown" }),
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown", stack: e instanceof Error ? e.stack : "" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
