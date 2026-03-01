@@ -108,37 +108,53 @@ export default function CriarEsboco() {
 
     const analyses = ANALYSIS_OPTIONS.filter((a) => selectedAnalyses.has(a.id)).map((a) => a.label).join(", ");
     const refs = extraRefs.filter(Boolean).join("; ");
-    const prompt = `Crie um esboço de pregação completo e detalhado.
-Título: ${title || "Definir pelo contexto"}
-Tema: ${theme || "Definir pelo contexto"}
-Tipo de estudo: ${studyType}
-Versão: ${bibleVersion}
-Referência: ${book} ${chapter}${verses ? `:${verses}` : ""}
-${refs ? `Referências adicionais: ${refs}` : ""}
-${analyses ? `Incluir análises: ${analyses}` : ""}
-${extraInstructions ? `Instruções extras: ${extraInstructions}` : ""}
+    const prompt = `Crie um esboço de pregação completo e detalhado, seguindo EXATAMENTE a estrutura e o estilo abaixo.
 
-Estruture o esboço OBRIGATORIAMENTE nesta ordem:
+**DADOS DA PREGAÇÃO:**
+- Título: ${title || "Definir pelo contexto"}
+- Tema: ${theme || "Definir pelo contexto"}
+- Tipo de estudo: ${studyType}
+- Versão bíblica: ${bibleVersion}
+- Texto base: ${book} ${chapter}${verses ? `:${verses}` : ""}
+${refs ? `- Referências adicionais: ${refs}` : ""}
+${analyses ? `- Incluir análises: ${analyses}` : ""}
+${extraInstructions ? `- Instruções extras: ${extraInstructions}` : ""}
+
+**ESTRUTURA OBRIGATÓRIA DO ESBOÇO:**
+
+## 📖 TEXTO BÍBLICO: [Referência completa]
+## 🎯 TEMA: [Tema da pregação]
 
 ## 📖 INTRODUÇÃO
-- Apresente o tema de forma envolvente e contextualizada
-- Explique a relevância do tema para a vida cristã hoje
-- Cite o texto base e dê o panorama geral da passagem
+- Comece definindo os termos-chave do tema (ex: "O que é confiança?", "O que significa Messias?", "Quantos tipos de amor existem?"). Use definições claras e acessíveis.
+- Apresente o contexto do livro bíblico: quem escreveu, para quem, divisão do livro, época.
+- Dê um panorama geral da passagem e dos principais pontos que serão abordados.
+- Traga versículos bíblicos já na introdução que sustentem o contexto apresentado, sempre escritos POR EXTENSO.
 
 ## 📝 DESENVOLVIMENTO
-Para cada tópico da lição:
-- Crie subtítulos claros e organizados (Tópico 1, Tópico 2, etc.)
-- Dentro de cada tópico, traga **aplicações práticas** para a vida do ouvinte
-- Inclua **referências bíblicas adicionais** que se relacionem ao texto principal e ao tema
-- Conecte cada ponto ao texto base, mostrando como se relaciona com a passagem central
-- Use linguagem pastoral, didática e acessível
+Crie de **3 a 5 tópicos principais numerados** (1, 2, 3...). Para CADA tópico:
+- Dê um título claro e objetivo ao tópico.
+- Dentro de cada tópico, crie **no mínimo 4 a 6 subtópicos** detalhados.
+- **REGRA CRUCIAL**: Em CADA subtópico, inclua pelo menos 1 versículo bíblico ESCRITO POR EXTENSO (não apenas a referência). Exemplo: *Romanos 10:17 "De sorte que a fé é pelo ouvir, e o ouvir pela palavra de Deus."*
+- Os versículos devem ter LIGAÇÃO DIRETA com o subtópico e com o tema central da pregação.
+- Traga aplicações práticas dentro dos subtópicos quando pertinente.
+- Use linguagem pastoral, didática e acessível.
+- Quando possível, faça conexões entre Antigo e Novo Testamento.
+- Inclua listas quando apropriado (como "Quem é Jesus?" com múltiplos versículos de João, ou "Aspectos da fé" com exemplos bíblicos).
 
 ## ✅ CONCLUSÃO
-- Faça um **resumo claro da mensagem**, recapitulando os pontos principais
-- Reforce a aplicação central do texto
-- Encerre com uma exortação ou convite à reflexão/ação
+- Faça uma exortação pessoal e direta ao ouvinte.
+- Traga um versículo final impactante ESCRITO POR EXTENSO que resuma toda a mensagem.
+- Convide à reflexão e à decisão prática.
 
-Use linguagem pastoral, rica em referências bíblicas e com aplicações relevantes ao contexto atual.`;
+**REGRAS DE ESTILO (SIGA RIGOROSAMENTE):**
+1. Cada tópico deve ter NO MÍNIMO 4 subtópicos, e cada subtópico DEVE conter pelo menos 1 versículo bíblico escrito por extenso.
+2. Nunca coloque apenas a referência bíblica — sempre escreva o texto do versículo completo entre aspas.
+3. Use negrito para termos-chave e nomes de conceitos teológicos.
+4. A estrutura deve ser organizada e visualmente clara com numeração e subtítulos.
+5. O esboço deve ser EXTENSO e DETALHADO, com riqueza de referências bíblicas cruzadas.
+6. Traga versículos de diferentes livros da Bíblia para enriquecer cada ponto.
+7. A linguagem deve ser pastoral — como se estivesse ensinando a uma congregação real.`;
 
     try {
       await streamAI(
