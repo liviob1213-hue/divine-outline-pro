@@ -23,7 +23,12 @@ Deno.serve(async (req) => {
     // Kiwify sends different event types
     const event = body.order_status || body.event || body.subscription_status;
     const email = body.Customer?.email || body.customer?.email || body.email;
-    const plan = body.Product?.name?.toLowerCase()?.includes("anual") ? "annual" : "monthly";
+    const productName = (body.Product?.name || body.product?.name || "").toLowerCase();
+    const plan = productName.includes("vitalic") || productName.includes("lifetime")
+      ? "lifetime"
+      : productName.includes("anual") || productName.includes("annual")
+        ? "annual"
+        : "monthly";
     const transactionId = body.order_id || body.transaction_id || body.id;
     const subscriptionId = body.subscription_id || body.Subscription?.id || null;
 
@@ -71,13 +76,18 @@ Deno.serve(async (req) => {
     // Calculate expiration
     let expiresAt: string | null = null;
     if (status === "active") {
-      const now = new Date();
-      if (plan === "annual") {
-        now.setFullYear(now.getFullYear() + 1);
+      if (plan === "lifetime") {
+        // Lifetime: set expiry far in the future
+        expiresAt = new Date("2099-12-31T23:59:59Z").toISOString();
       } else {
-        now.setMonth(now.getMonth() + 1);
+        const now = new Date();
+        if (plan === "annual") {
+          now.setFullYear(now.getFullYear() + 1);
+        } else {
+          now.setMonth(now.getMonth() + 1);
+        }
+        expiresAt = now.toISOString();
       }
-      expiresAt = now.toISOString();
     }
 
     // Upsert subscription
