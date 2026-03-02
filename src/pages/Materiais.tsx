@@ -87,7 +87,7 @@ export default function Materiais() {
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </Link>
             <div>
-              <h1 className="font-display text-xl font-bold text-foreground">Materiais do Pastor</h1>
+              <h1 className="font-display text-xl font-bold text-foreground">Materiais do Pregador</h1>
               <p className="text-xs text-muted-foreground font-body">Anotações, imagens e vídeos</p>
             </div>
           </div>
