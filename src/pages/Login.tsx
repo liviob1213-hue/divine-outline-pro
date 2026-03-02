@@ -146,7 +146,7 @@ export default function Login() {
 
           <p className="text-xs text-muted-foreground text-center mt-4">
             Ainda não tem acesso?{" "}
-            <a href="https://kiwify.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <a href="/vendas" className="text-primary hover:underline">
               Adquira aqui
             </a>
           </p>
