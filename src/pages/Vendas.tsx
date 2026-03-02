@@ -322,8 +322,7 @@ export default function Vendas() {
             <div className="grid grid-cols-3 bg-primary/10 font-body font-bold text-xs uppercase tracking-wider min-w-[400px]">
               <div className="p-3 text-muted-foreground">Recurso</div>
               <div className="p-3 text-center text-foreground">Palavraai</div>
-              <div className="p-3 text-center text-muted-foreground">
-              </div>
+              <div className="p-3 text-center text-muted-foreground">OUTROS APPS</div>
             </div>
             {comparison.map((row, i) => <div key={i} className={`grid grid-cols-3 text-sm font-body min-w-[400px] ${i % 2 === 0 ? "bg-card" : "bg-card/50"} border-t border-border`}>
                 <div className="p-3 text-foreground font-medium text-xs md:text-sm">{row.feature}</div>
