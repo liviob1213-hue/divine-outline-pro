@@ -50,17 +50,17 @@ const features = [
 
 // ─── Social Proof Names ───────────────────────────
 const socialProofNames = [
-  "Lucas M.", "Ana P.", "Carlos R.", "Fernanda S.", "João V.",
-  "Maria L.", "Pedro H.", "Juliana C.", "Rafael A.", "Beatriz F.",
-  "Daniel O.", "Priscila N.", "Thiago B.", "Camila D.", "André G.",
-  "Patricia M.", "Marcos T.", "Renata K.", "Samuel J.", "Débora E.",
-];
+"Lucas M.", "Ana P.", "Carlos R.", "Fernanda S.", "João V.",
+"Maria L.", "Pedro H.", "Juliana C.", "Rafael A.", "Beatriz F.",
+"Daniel O.", "Priscila N.", "Thiago B.", "Camila D.", "André G.",
+"Patricia M.", "Marcos T.", "Renata K.", "Samuel J.", "Débora E."];
+
 const socialProofPlans = ["Mensal", "Anual", "Vitalício"];
 const socialProofCities = [
-  "São Paulo, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG",
-  "Salvador, BA", "Curitiba, PR", "Fortaleza, CE", "Recife, PE",
-  "Manaus, AM", "Goiânia, GO", "Brasília, DF",
-];
+"São Paulo, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG",
+"Salvador, BA", "Curitiba, PR", "Fortaleza, CE", "Recife, PE",
+"Manaus, AM", "Goiânia, GO", "Brasília, DF"];
+
 
 
 const comparison = [
@@ -113,7 +113,7 @@ export default function Vendas() {
     name: socialProofNames[proofIndex],
     plan: socialProofPlans[proofIndex % socialProofPlans.length],
     city: socialProofCities[proofIndex % socialProofCities.length],
-    minutesAgo: (proofIndex % 12) + 1,
+    minutesAgo: proofIndex % 12 + 1
   }), [proofIndex]);
 
   const scrollToPrice = () => {
@@ -322,28 +322,28 @@ export default function Vendas() {
             <div className="grid grid-cols-3 bg-primary/10 font-body font-bold text-xs uppercase tracking-wider min-w-[400px]">
               <div className="p-3 text-muted-foreground">Recurso</div>
               <div className="p-3 text-center text-foreground">Palavraai</div>
-              <div className="p-3 text-center text-muted-foreground">mBíblia</div>
+              <div className="p-3 text-center text-muted-foreground">
+              </div>
             </div>
-            {comparison.map((row, i) =>
-            <div key={i} className={`grid grid-cols-3 text-sm font-body min-w-[400px] ${i % 2 === 0 ? "bg-card" : "bg-card/50"} border-t border-border`}>
+            {comparison.map((row, i) => <div key={i} className={`grid grid-cols-3 text-sm font-body min-w-[400px] ${i % 2 === 0 ? "bg-card" : "bg-card/50"} border-t border-border`}>
                 <div className="p-3 text-foreground font-medium text-xs md:text-sm">{row.feature}</div>
                 <div className="p-3 text-center">
                   {row.us === true ?
-                <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
-                typeof row.us === "string" ?
-                <span className="text-green-400 font-semibold text-xs md:text-sm">{row.us}</span> :
+                  <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
+                  typeof row.us === "string" ?
+                  <span className="text-green-400 font-semibold text-xs md:text-sm">{row.us}</span> :
 
-                <XCircle className="w-5 h-5 text-destructive mx-auto" />
-                }
+                  <XCircle className="w-5 h-5 text-destructive mx-auto" />
+                  }
                 </div>
                 <div className="p-3 text-center">
                   {row.them === true ?
-                <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
-                row.them === false ?
-                <XCircle className="w-5 h-5 text-destructive/60 mx-auto" /> :
+                  <CheckCircle2 className="w-5 h-5 text-green-500 mx-auto" /> :
+                  row.them === false ?
+                  <XCircle className="w-5 h-5 text-destructive/60 mx-auto" /> :
 
-                <span className="text-muted-foreground text-xs">{row.them}</span>
-                }
+                  <span className="text-muted-foreground text-xs">{row.them}</span>
+                  }
                 </div>
               </div>
             )}
@@ -601,10 +601,10 @@ export default function Vendas() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.4 }}
-            className="bg-card border border-border rounded-xl px-4 py-3 shadow-lg flex items-center gap-3"
-          >
+            className="bg-card border border-border rounded-xl px-4 py-3 shadow-lg flex items-center gap-3">
+
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground flex-shrink-0">
-              {currentProof.name.split(" ").map(n => n[0]).join("")}
+              {currentProof.name.split(" ").map((n) => n[0]).join("")}
             </div>
             <div>
               <p className="text-xs font-body font-semibold text-foreground">
