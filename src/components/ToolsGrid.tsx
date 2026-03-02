@@ -87,7 +87,7 @@ const tools = [
     badge: "Exclusivo",
   },
   {
-    title: "Materiais do Pastor",
+    title: "Materiais do Pregador",
     description: "Anotações, imagens e vídeos salvos",
     icon: FolderOpen,
     bg: "bg-gradient-to-br from-[hsl(280,60%,45%)] to-[hsl(300,50%,35%)]",
