@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  DialogDescription } from
+"@/components/ui/dialog";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ export default function Header() {
     <>
       <header className="flex items-center justify-between py-4 pt-[env(safe-area-inset-top,16px)]" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}>
         <Link to="/" className="flex items-center gap-2">
-          <img src={logoPregai} alt="Palavraai" className="w-20 h-20 drop-shadow-lg" />
+          <img alt="Palavraai" className="w-20 h-20 drop-shadow-lg" src="/lovable-uploads/48d75f09-f246-4bb5-9bf9-741bbc84c175.png" />
           <span className="font-display font-bold text-xl text-foreground">
             Palavraai
           </span>
@@ -116,8 +116,8 @@ export default function Header() {
           <button
             onClick={() => setIsDark(!isDark)}
             className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title={isDark ? "Modo claro" : "Modo escuro"}
-          >
+            title={isDark ? "Modo claro" : "Modo escuro"}>
+
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
 
@@ -126,53 +126,53 @@ export default function Header() {
           <button
               onClick={handleBellClick}
               className={`p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors relative ${enabled ? "text-amber hover:bg-amber/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-              title="Notificações"
-            >
+              title="Notificações">
+
               {enabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {unreadCount > 0 &&
+              <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
-              )}
+              }
             </button>
 
-            {showNotifPanel && (
-              <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-card border border-border rounded-xl shadow-xl z-50">
+            {showNotifPanel &&
+            <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-card border border-border rounded-xl shadow-xl z-50">
                 <div className="p-3 border-b border-border flex items-center justify-between">
                   <h3 className="font-display font-bold text-sm text-foreground">Notificações</h3>
-                  {!enabled && (
-                    <button
-                      onClick={handleToggleNotification}
-                      className="text-[10px] font-body font-semibold text-primary hover:underline"
-                    >
+                  {!enabled &&
+                <button
+                  onClick={handleToggleNotification}
+                  className="text-[10px] font-body font-semibold text-primary hover:underline">
+
                       Ativar Push
                     </button>
-                  )}
+                }
                 </div>
-                {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-sm text-muted-foreground font-body">
+                {notifications.length === 0 ?
+              <div className="p-6 text-center text-sm text-muted-foreground font-body">
                     Nenhuma notificação ainda.
-                  </div>
-                ) : (
-                  notifications.map((n) => (
-                    <div key={n.id} className="p-3 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors">
+                  </div> :
+
+              notifications.map((n) =>
+              <div key={n.id} className="p-3 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors">
                       <p className="text-xs font-body font-semibold text-foreground">{n.title}</p>
                       <p className="text-xs text-muted-foreground font-body mt-0.5 leading-relaxed">{n.body}</p>
                       <p className="text-[10px] text-muted-foreground font-body mt-1">
                         {new Date(n.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
-                  ))
-                )}
+              )
+              }
               </div>
-            )}
+            }
           </div>
 
           <button
             onClick={handleLogout}
             className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-            title="Sair"
-          >
+            title="Sair">
+
             <LogOut className="w-5 h-5" />
           </button>
         </div>
@@ -214,6 +214,6 @@ export default function Header() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>);
+
 }
