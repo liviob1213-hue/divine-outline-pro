@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroVideo from "@/assets/hero-bible-video.mp4";
-const logoPregai = "/logo-palavraai.png";
+import logoPregai from "@/assets/logo-palavraai-new.png";
 
 // Note: brand name is Palavraai
 export default function HeroSection() {

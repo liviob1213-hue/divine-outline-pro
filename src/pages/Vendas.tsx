@@ -8,7 +8,7 @@ import {
   Users, Crown, ChevronDown } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
-const logoPregai = "/logo-palavraai.png";
+import logoPregai from "@/assets/logo-palavraai-new.png";
 
 // ─── Countdown Timer ───────────────────────────────
 function useCountdown(minutes: number) {
