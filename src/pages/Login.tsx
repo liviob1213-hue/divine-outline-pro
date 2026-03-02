@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AnimatedBackground from "@/components/AnimatedBackground";
-const logoPregai = "/logo-palavraai.png";
+import logoPregai from "@/assets/logo-palavraai-new.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");

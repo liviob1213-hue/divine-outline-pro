@@ -47,15 +47,18 @@ const Index = () => {
       <AnimatedBackground />
       <div className="relative z-10 max-w-5xl mx-auto px-4 lg:px-8">
         <Header />
-        {/* Versículo + Continuar Leitura acima das ferramentas no mobile */}
+        {/* Hero card at the very top on mobile */}
         <div className="lg:hidden">
+          <HeroSection />
           <VersiculoDoDia />
           <ContinueReading />
         </div>
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           {/* Main content */}
           <div className="lg:col-span-2">
-            <HeroSection />
+            <div className="hidden lg:block">
+              <HeroSection />
+            </div>
             <ToolsGrid />
           </div>
           {/* Sidebar on desktop only */}
