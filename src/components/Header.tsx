@@ -104,7 +104,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="flex items-center justify-between py-4">
+      <header className="flex items-center justify-between py-4 pt-[env(safe-area-inset-top,16px)]" style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}>
         <Link to="/" className="flex items-center gap-2">
           <img src={logoPregai} alt="Palavraai" className="w-20 h-20 drop-shadow-lg" />
           <span className="font-display font-bold text-xl text-foreground">
