@@ -55,6 +55,12 @@ export default function VersiculoDoDia() {
   };
 
   useEffect(() => {
+    // Clear old cache once to force fresh themed verse
+    const cacheVersion = "v2";
+    if (localStorage.getItem(CACHE_KEY + "_ver") !== cacheVersion) {
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.setItem(CACHE_KEY + "_ver", cacheVersion);
+    }
     fetchVerse();
   }, []);
 
