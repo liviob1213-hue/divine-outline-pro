@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,39 +6,39 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Fallback verses when DB is empty
+const THEMES = [
+  "salvação",
+  "fé",
+  "relacionamento",
+  "amizade",
+  "sabedoria",
+  "confiança",
+  "promessa",
+  "fidelidade",
+  "amor",
+  "vitória",
+  "esperança",
+  "batalha espiritual",
+  "casamento",
+  "alegria",
+];
+
+// Fallback verses in case AI fails
 const FALLBACK_VERSES = [
-  { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.", reference: "João 3:16", book: "João", chapter: 3, verse: 16 },
-  { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1", book: "Salmos", chapter: 23, verse: 1 },
-  { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13", book: "Filipenses", chapter: 4, verse: 13 },
-  { text: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.", reference: "Provérbios 3:5", book: "Provérbios", chapter: 3, verse: 5 },
-  { text: "Eu sou o caminho, a verdade e a vida; ninguém vem ao Pai senão por mim.", reference: "João 14:6", book: "João", chapter: 14, verse: 6 },
-  { text: "Porque eu bem sei os pensamentos que penso de vós, diz o Senhor; pensamentos de paz e não de mal, para vos dar o fim que esperais.", reference: "Jeremias 29:11", book: "Jeremias", chapter: 29, verse: 11 },
-  { text: "Esforçai-vos, e animai-vos; não temais, nem vos espanteis diante deles, porque o Senhor, vosso Deus, é o que vai convosco; não vos deixará, nem vos desamparará.", reference: "Deuteronômio 31:6", book: "Deuteronômio", chapter: 31, verse: 6 },
-  { text: "Mas os que esperam no Senhor renovarão as suas forças, subirão com asas como águias, correrão e não se cansarão, caminharão e não se fatigarão.", reference: "Isaías 40:31", book: "Isaías", chapter: 40, verse: 31 },
-  { text: "Não to mandei eu? Esforça-te e tem bom ânimo; não pasmes, nem te espantes, porque o Senhor, teu Deus, é contigo, por onde quer que andares.", reference: "Josué 1:9", book: "Josué", chapter: 1, verse: 9 },
-  { text: "E sabemos que todas as coisas contribuem juntamente para o bem daqueles que amam a Deus, daqueles que são chamados por seu decreto.", reference: "Romanos 8:28", book: "Romanos", chapter: 8, verse: 28 },
-  { text: "Não andeis ansiosos de coisa alguma; em tudo, porém, sejam conhecidas, diante de Deus, as vossas petições, pela oração e pela súplica, com ações de graças.", reference: "Filipenses 4:6", book: "Filipenses", chapter: 4, verse: 6 },
-  { text: "Lâmpada para os meus pés é a tua palavra e luz para o meu caminho.", reference: "Salmos 119:105", book: "Salmos", chapter: 119, verse: 105 },
-  { text: "Vinde a mim, todos os que estais cansados e oprimidos, e eu vos aliviarei.", reference: "Mateus 11:28", book: "Mateus", chapter: 11, verse: 28 },
-  { text: "O Senhor é a minha luz e a minha salvação; a quem temerei? O Senhor é a força da minha vida; de quem me recearei?", reference: "Salmos 27:1", book: "Salmos", chapter: 27, verse: 1 },
-  { text: "Buscai primeiro o Reino de Deus, e a sua justiça, e todas essas coisas vos serão acrescentadas.", reference: "Mateus 6:33", book: "Mateus", chapter: 6, verse: 33 },
-  { text: "A minha graça te basta, porque o meu poder se aperfeiçoa na fraqueza.", reference: "2 Coríntios 12:9", book: "2 Coríntios", chapter: 12, verse: 9 },
-  { text: "Deleita-te também no Senhor, e ele te concederá o que deseja o teu coração.", reference: "Salmos 37:4", book: "Salmos", chapter: 37, verse: 4 },
-  { text: "Se Deus é por nós, quem será contra nós?", reference: "Romanos 8:31", book: "Romanos", chapter: 8, verse: 31 },
-  { text: "Clama a mim, e responder-te-ei e anunciar-te-ei coisas grandes e firmes, que não sabes.", reference: "Jeremias 33:3", book: "Jeremias", chapter: 33, verse: 3 },
-  { text: "Entrega o teu caminho ao Senhor; confia nele, e ele tudo fará.", reference: "Salmos 37:5", book: "Salmos", chapter: 37, verse: 5 },
-  { text: "Bem-aventurados os que têm fome e sede de justiça, porque eles serão fartos.", reference: "Mateus 5:6", book: "Mateus", chapter: 5, verse: 6 },
-  { text: "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.", reference: "Salmos 46:1", book: "Salmos", chapter: 46, verse: 1 },
-  { text: "O amor é paciente, o amor é bondoso. Não inveja, não se vangloria, não se orgulha.", reference: "1 Coríntios 13:4", book: "1 Coríntios", chapter: 13, verse: 4 },
-  { text: "Ora, a fé é o firme fundamento das coisas que se esperam e a prova das coisas que se não veem.", reference: "Hebreus 11:1", book: "Hebreus", chapter: 11, verse: 1 },
-  { text: "Porque para Deus nada é impossível.", reference: "Lucas 1:37", book: "Lucas", chapter: 1, verse: 37 },
-  { text: "Estas coisas vos tenho dito para que em mim tenhais paz. No mundo tereis tribulações; mas tende bom ânimo, eu venci o mundo.", reference: "João 16:33", book: "João", chapter: 16, verse: 33 },
-  { text: "Dai graças em tudo, porque esta é a vontade de Deus em Cristo Jesus para convosco.", reference: "1 Tessalonicenses 5:18", book: "1 Tessalonicenses", chapter: 5, verse: 18 },
-  { text: "Ensina-me a fazer a tua vontade, pois tu és o meu Deus; guie-me o teu bom Espírito por terra plana.", reference: "Salmos 143:10", book: "Salmos", chapter: 143, verse: 10 },
-  { text: "Eis que estou à porta e bato; se alguém ouvir a minha voz e abrir a porta, entrarei em sua casa e com ele cearei, e ele comigo.", reference: "Apocalipse 3:20", book: "Apocalipse", chapter: 3, verse: 20 },
-  { text: "Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.", reference: "Filipenses 4:4", book: "Filipenses", chapter: 4, verse: 4 },
-  { text: "Pois onde estiver o vosso tesouro, aí estará também o vosso coração.", reference: "Mateus 6:21", book: "Mateus", chapter: 6, verse: 21 },
+  { text: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.", reference: "João 3:16", book: "João", chapter: 3, verse: 16, theme: "salvação" },
+  { text: "Ora, a fé é o firme fundamento das coisas que se esperam e a prova das coisas que se não veem.", reference: "Hebreus 11:1", book: "Hebreus", chapter: 11, verse: 1, theme: "fé" },
+  { text: "O amor é paciente, o amor é bondoso. Não inveja, não se vangloria, não se orgulha.", reference: "1 Coríntios 13:4", book: "1 Coríntios", chapter: 13, verse: 4, theme: "amor" },
+  { text: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.", reference: "Provérbios 3:5", book: "Provérbios", chapter: 3, verse: 5, theme: "confiança" },
+  { text: "O Senhor é o meu pastor; nada me faltará.", reference: "Salmos 23:1", book: "Salmos", chapter: 23, verse: 1, theme: "fidelidade" },
+  { text: "Tudo posso naquele que me fortalece.", reference: "Filipenses 4:13", book: "Filipenses", chapter: 4, verse: 13, theme: "vitória" },
+  { text: "Mas os que esperam no Senhor renovarão as suas forças, subirão com asas como águias, correrão e não se cansarão, caminharão e não se fatigarão.", reference: "Isaías 40:31", book: "Isaías", chapter: 40, verse: 31, theme: "esperança" },
+  { text: "Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.", reference: "Filipenses 4:4", book: "Filipenses", chapter: 4, verse: 4, theme: "alegria" },
+  { text: "Em todo o tempo ama o amigo; e na angústia nasce o irmão.", reference: "Provérbios 17:17", book: "Provérbios", chapter: 17, verse: 17, theme: "amizade" },
+  { text: "Revesti-vos de toda a armadura de Deus, para que possais estar firmes contra as astutas ciladas do diabo.", reference: "Efésios 6:11", book: "Efésios", chapter: 6, verse: 11, theme: "batalha espiritual" },
+  { text: "Vós, maridos, amai vossa mulher, como também Cristo amou a igreja e a si mesmo se entregou por ela.", reference: "Efésios 5:25", book: "Efésios", chapter: 5, verse: 25, theme: "casamento" },
+  { text: "O princípio da sabedoria é o temor do Senhor; bom entendimento têm todos os que lhe obedecem.", reference: "Salmos 111:10", book: "Salmos", chapter: 111, verse: 10, theme: "sabedoria" },
+  { text: "Porque eu bem sei os pensamentos que penso de vós, diz o Senhor; pensamentos de paz e não de mal, para vos dar o fim que esperais.", reference: "Jeremias 29:11", book: "Jeremias", chapter: 29, verse: 11, theme: "promessa" },
+  { text: "Nenhuma arma forjada contra ti prosperará; e toda língua que se levantar contra ti em juízo, tu a condenarás.", reference: "Isaías 54:17", book: "Isaías", chapter: 54, verse: 17, theme: "vitória" },
 ];
 
 function dateToSeed(dateStr: string): number {
@@ -58,53 +57,89 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const now = new Date();
     const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000);
     const dateStr = brt.toISOString().split("T")[0];
     const seed = dateToSeed(dateStr);
 
-    // Try DB first
-    const { count } = await supabase
-      .from("biblias")
-      .select("id", { count: "exact", head: true })
-      .eq("versao", "ARA");
+    // Pick today's theme based on date
+    const themeIndex = seed % THEMES.length;
+    const todayTheme = THEMES[themeIndex];
 
-    if (count && count > 0) {
-      const offset = seed % count;
-      const { data: verses } = await supabase
-        .from("biblias")
-        .select("id, livro_id, capitulo, versiculo, texto")
-        .eq("versao", "ARA")
-        .order("id", { ascending: true })
-        .range(offset, offset);
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-      if (verses && verses.length > 0) {
-        const verse = verses[0];
-        const { data: book } = await supabase
-          .from("livros_biblia")
-          .select("nome")
-          .eq("id", verse.livro_id)
-          .maybeSingle();
+    if (LOVABLE_API_KEY) {
+      try {
+        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              {
+                role: "system",
+                content: `Você é um assistente bíblico. Responda APENAS com um JSON válido, sem markdown, sem explicações.
+O formato deve ser exatamente:
+{"text":"texto do versículo","reference":"Livro capítulo:versículo","book":"Livro","chapter":número,"verse":número}
 
-        return new Response(JSON.stringify({
-          date: dateStr,
-          text: verse.texto,
-          reference: `${book?.nome || "?"} ${verse.capitulo}:${verse.versiculo}`,
-          book: book?.nome || "",
-          chapter: verse.capitulo,
-          verse: verse.versiculo,
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+Regras:
+- O versículo DEVE ser real e existir na Bíblia
+- Use a tradução Almeida Revista e Atualizada (ARA)
+- O versículo deve ser DIFERENTE a cada pedido
+- Escolha versículos variados e menos conhecidos quando possível, não repita os mais famosos sempre
+- A referência deve ser precisa (livro, capítulo e versículo corretos)`
+              },
+              {
+                role: "user",
+                content: `Hoje é ${dateStr}. O tema do dia é "${todayTheme}". 
+Me dê UM versículo bíblico profundo e inspirador sobre este tema. 
+Use a seed ${seed} para variar a escolha — não repita versículos comuns.
+Retorne APENAS o JSON, nada mais.`
+              }
+            ],
+            temperature: 0.9,
+          }),
         });
+
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          const content = aiData.choices?.[0]?.message?.content;
+
+          if (content) {
+            // Clean up potential markdown formatting
+            const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            const parsed = JSON.parse(cleaned);
+
+            if (parsed.text && parsed.reference && parsed.book) {
+              return new Response(JSON.stringify({
+                date: dateStr,
+                text: parsed.text,
+                reference: parsed.reference,
+                book: parsed.book,
+                chapter: parsed.chapter || 1,
+                verse: parsed.verse || 1,
+                theme: todayTheme,
+              }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          }
+        } else {
+          console.error("AI gateway error:", aiResponse.status, await aiResponse.text());
+        }
+      } catch (aiErr) {
+        console.error("AI verse selection failed, using fallback:", aiErr);
       }
     }
 
-    // Fallback to embedded verses
-    const fallback = FALLBACK_VERSES[seed % FALLBACK_VERSES.length];
+    // Fallback: use curated themed verses
+    const themedFallbacks = FALLBACK_VERSES.filter(v => v.theme === todayTheme);
+    const pool = themedFallbacks.length > 0 ? themedFallbacks : FALLBACK_VERSES;
+    const fallback = pool[seed % pool.length];
+
     return new Response(JSON.stringify({
       date: dateStr,
       text: fallback.text,
@@ -112,6 +147,7 @@ serve(async (req) => {
       book: fallback.book,
       chapter: fallback.chapter,
       verse: fallback.verse,
+      theme: todayTheme,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

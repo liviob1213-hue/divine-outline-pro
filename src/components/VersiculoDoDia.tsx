@@ -11,6 +11,7 @@ interface DailyVerse {
   book: string;
   chapter: number;
   verse: number;
+  theme?: string;
 }
 
 const CACHE_KEY = "pregai_daily_verse";
@@ -138,10 +139,15 @@ export default function VersiculoDoDia() {
                 </button>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
                 <p className="text-xs text-muted-foreground italic">
                   🕊️ Medite neste versículo hoje. Deixe a Palavra de Deus transformar seu dia.
                 </p>
+                {verse.theme && (
+                  <span className="text-[10px] uppercase tracking-wider font-medium text-amber/60 bg-amber/5 px-2 py-0.5 rounded-full">
+                    {verse.theme}
+                  </span>
+                )}
               </div>
             </div>
           </motion.div>
