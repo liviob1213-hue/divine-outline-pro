@@ -77,30 +77,35 @@ serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
+            model: "google/gemini-2.5-flash",
             messages: [
               {
                 role: "system",
-                content: `Você é um assistente bíblico. Responda APENAS com um JSON válido, sem markdown, sem explicações.
-O formato deve ser exatamente:
-{"text":"texto do versículo","reference":"Livro capítulo:versículo","book":"Livro","chapter":número,"verse":número}
+                content: `Você é um especialista em Bíblia Sagrada. Sua ÚNICA tarefa é retornar um versículo bíblico REAL sobre um tema específico.
 
-Regras:
-- O versículo DEVE ser real e existir na Bíblia
-- Use a tradução Almeida Revista e Atualizada (ARA)
-- O versículo deve ser DIFERENTE a cada pedido
-- Escolha versículos variados e menos conhecidos quando possível, não repita os mais famosos sempre
-- A referência deve ser precisa (livro, capítulo e versículo corretos)`
+REGRAS OBRIGATÓRIAS:
+1. O versículo DEVE existir na Bíblia Sagrada - NUNCA invente versículos
+2. O versículo DEVE estar diretamente relacionado ao tema pedido
+3. Use a tradução Almeida Revista e Atualizada (ARA)
+4. NÃO retorne versículos históricos, genealógicos ou narrativos sem mensagem espiritual
+5. O versículo deve conter uma mensagem edificante, de encorajamento ou ensinamento
+6. A referência (livro, capítulo, versículo) DEVE ser precisa e correta
+
+Responda APENAS com este JSON, sem markdown, sem explicações:
+{"text":"texto exato do versículo na ARA","reference":"Livro capítulo:versículo","book":"Livro","chapter":número,"verse":número}`
               },
               {
                 role: "user",
-                content: `Hoje é ${dateStr}. O tema do dia é "${todayTheme}". 
-Me dê UM versículo bíblico profundo e inspirador sobre este tema. 
-Use a seed ${seed} para variar a escolha — não repita versículos comuns.
-Retorne APENAS o JSON, nada mais.`
+                content: `Tema de hoje: "${todayTheme}"
+Data: ${dateStr} (use como seed para variar)
+
+Me dê um versículo bíblico PROFUNDO e INSPIRADOR sobre "${todayTheme}".
+O versículo deve falar DIRETAMENTE sobre ${todayTheme} - não pode ser um versículo aleatório.
+Exemplos de livros bons para buscar: Salmos, Provérbios, Isaías, Romanos, Efésios, Filipenses, João, Mateus, Hebreus, 1 Coríntios, Gálatas, Colossenses, 1 Pedro, Tiago.
+Retorne APENAS o JSON.`
               }
             ],
-            temperature: 0.9,
+            temperature: 0.7,
           }),
         });
 
@@ -109,11 +114,12 @@ Retorne APENAS o JSON, nada mais.`
           const content = aiData.choices?.[0]?.message?.content;
 
           if (content) {
-            // Clean up potential markdown formatting
             const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             const parsed = JSON.parse(cleaned);
 
-            if (parsed.text && parsed.reference && parsed.book) {
+            // Validate the verse has required fields and minimum text length
+            if (parsed.text && parsed.reference && parsed.book && parsed.text.length > 20) {
+              console.log("AI returned verse:", parsed.reference, "for theme:", todayTheme);
               return new Response(JSON.stringify({
                 date: dateStr,
                 text: parsed.text,
@@ -125,6 +131,8 @@ Retorne APENAS o JSON, nada mais.`
               }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
               });
+            } else {
+              console.error("AI returned invalid verse structure:", content);
             }
           }
         } else {
