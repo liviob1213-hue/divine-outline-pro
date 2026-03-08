@@ -50,6 +50,7 @@ const App = () => (
           <Route path="/install" element={<AuthGuard><Install /></AuthGuard>} />
           <Route path="/import-biblia" element={<AuthGuard><ImportBiblia /></AuthGuard>} />
           <Route path="/curso" element={<AuthGuard><CursoTeologia /></AuthGuard>} />
+          <Route path="/enciclopedia-biblica" element={<AuthGuard><EnciclopediaBiblica /></AuthGuard>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

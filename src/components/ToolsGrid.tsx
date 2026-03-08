@@ -105,6 +105,16 @@ const tools = [
     badge: "Novo",
     span: "col-span-2",
   },
+  {
+    title: "Enciclopédia Bíblica",
+    description: "Divisões e resumos dos 66 livros",
+    icon: Library,
+    bg: "bg-gradient-to-br from-[hsl(30,60%,35%)] to-[hsl(25,50%,25%)]",
+    iconColor: "text-amber-200",
+    link: "/enciclopedia-biblica",
+    badge: "Novo",
+    span: "col-span-2",
+  },
 ];
 
 const containerVariants = {
