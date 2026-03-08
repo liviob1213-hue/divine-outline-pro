@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap, Download } from "lucide-react";
+import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap, Download, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import InstallGuideDialog from "@/components/InstallGuideDialog";
