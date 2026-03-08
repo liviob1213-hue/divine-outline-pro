@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap, Download } from "lucide-react";
+import { BookOpen, FileText, Heart, NotebookPen, Sparkles, Music, MessageCircle, FolderOpen, BookMarked, Languages, GraduationCap, Download, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import InstallGuideDialog from "@/components/InstallGuideDialog";
@@ -102,6 +102,16 @@ const tools = [
     bg: "bg-gradient-to-br from-[hsl(262,70%,50%)] to-[hsl(200,70%,45%)]",
     iconColor: "text-cyan-200",
     link: "/curso",
+    badge: "Novo",
+    span: "col-span-2",
+  },
+  {
+    title: "Enciclopédia Bíblica",
+    description: "Divisões e resumos dos 66 livros",
+    icon: Library,
+    bg: "bg-gradient-to-br from-[hsl(30,60%,35%)] to-[hsl(25,50%,25%)]",
+    iconColor: "text-amber-200",
+    link: "/enciclopedia-biblica",
     badge: "Novo",
     span: "col-span-2",
   },

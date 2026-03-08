@@ -19,6 +19,7 @@ import EnciclopediaJudaica from "./pages/EnciclopediaJudaica";
 import Install from "./pages/Install";
 import ImportBiblia from "./pages/ImportBiblia";
 import CursoTeologia from "./pages/CursoTeologia";
+import EnciclopediaBiblica from "./pages/EnciclopediaBiblica";
 import WebhookTest from "./pages/WebhookTest";
 import Vendas from "./pages/Vendas";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/install" element={<AuthGuard><Install /></AuthGuard>} />
           <Route path="/import-biblia" element={<AuthGuard><ImportBiblia /></AuthGuard>} />
           <Route path="/curso" element={<AuthGuard><CursoTeologia /></AuthGuard>} />
+          <Route path="/enciclopedia-biblica" element={<AuthGuard><EnciclopediaBiblica /></AuthGuard>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
