@@ -203,7 +203,41 @@ export default function WebhookTest() {
           </Card>
         </div>
 
-        {/* Results log */}
+        {/* Conceder Acesso */}
+        <Card className="mb-6 border-primary/30">
+          <CardHeader>
+            <CardTitle className="text-lg">🎁 Conceder Acesso</CardTitle>
+            <CardDescription>Conceda acesso gratuito diretamente no banco de dados</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => grantAccess("free-month")}
+              disabled={loading !== null}
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {loading === "grant-free-month" ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Gift className="w-4 h-4 mr-2" />
+              )}
+              1 Mês Grátis
+            </Button>
+            <Button
+              onClick={() => grantAccess("lifetime")}
+              disabled={loading !== null}
+              className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
+              {loading === "grant-lifetime" ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Crown className="w-4 h-4 mr-2" />
+              )}
+              Acesso Vitalício
+            </Button>
+          </CardContent>
+        </Card>
+
+
         {results.length > 0 && (
           <Card>
             <CardHeader>
