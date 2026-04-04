@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Send, CheckCircle, XCircle, Gift, Crown } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { supabase } from "@/integrations/supabase/client";
 
 const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/kiwify-webhook`;
 
@@ -60,6 +61,61 @@ export default function WebhookTest() {
         { event, plan, success: false, response: String(err) },
         ...prev,
       ]);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const grantAccess = async (type: "free-month" | "lifetime") => {
+    if (!email.trim()) {
+      toast({ title: "Digite um email", variant: "destructive" });
+      return;
+    }
+
+    const key = `grant-${type}`;
+    setLoading(key);
+
+    try {
+      const now = new Date();
+      const expiresAt = type === "lifetime"
+        ? "2099-12-31T23:59:59Z"
+        : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const plan = type === "lifetime" ? "lifetime" : "monthly";
+
+      const { error } = await supabase
+        .from("subscriptions")
+        .upsert(
+          {
+            email: email.trim().toLowerCase(),
+            status: "active",
+            plan,
+            started_at: now.toISOString(),
+            expires_at: expiresAt,
+            updated_at: now.toISOString(),
+            cancelled_at: null,
+          },
+          { onConflict: "email" }
+        );
+
+      if (error) throw error;
+
+      const label = type === "lifetime" ? "Acesso Vitalício" : "1 Mês Grátis";
+      setResults((prev) => [
+        { event: label, plan, success: true, response: `Acesso concedido até ${new Date(expiresAt).toLocaleDateString("pt-BR")}` },
+        ...prev,
+      ]);
+
+      toast({
+        title: "Acesso concedido ✅",
+        description: `${label} ativado para ${email.trim().toLowerCase()}`,
+      });
+    } catch (err: any) {
+      setResults((prev) => [
+        { event: `grant-${type}`, plan: type, success: false, response: err.message || String(err) },
+        ...prev,
+      ]);
+      toast({ title: "Erro ao conceder acesso", description: String(err.message), variant: "destructive" });
     } finally {
       setLoading(null);
     }
@@ -147,7 +203,41 @@ export default function WebhookTest() {
           </Card>
         </div>
 
-        {/* Results log */}
+        {/* Conceder Acesso */}
+        <Card className="mb-6 border-primary/30">
+          <CardHeader>
+            <CardTitle className="text-lg">🎁 Conceder Acesso</CardTitle>
+            <CardDescription>Conceda acesso gratuito diretamente no banco de dados</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => grantAccess("free-month")}
+              disabled={loading !== null}
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {loading === "grant-free-month" ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Gift className="w-4 h-4 mr-2" />
+              )}
+              1 Mês Grátis
+            </Button>
+            <Button
+              onClick={() => grantAccess("lifetime")}
+              disabled={loading !== null}
+              className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
+              {loading === "grant-lifetime" ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Crown className="w-4 h-4 mr-2" />
+              )}
+              Acesso Vitalício
+            </Button>
+          </CardContent>
+        </Card>
+
+
         {results.length > 0 && (
           <Card>
             <CardHeader>
