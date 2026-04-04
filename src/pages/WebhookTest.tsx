@@ -66,6 +66,61 @@ export default function WebhookTest() {
     }
   };
 
+  const grantAccess = async (type: "free-month" | "lifetime") => {
+    if (!email.trim()) {
+      toast({ title: "Digite um email", variant: "destructive" });
+      return;
+    }
+
+    const key = `grant-${type}`;
+    setLoading(key);
+
+    try {
+      const now = new Date();
+      const expiresAt = type === "lifetime"
+        ? "2099-12-31T23:59:59Z"
+        : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const plan = type === "lifetime" ? "lifetime" : "monthly";
+
+      const { error } = await supabase
+        .from("subscriptions")
+        .upsert(
+          {
+            email: email.trim().toLowerCase(),
+            status: "active",
+            plan,
+            started_at: now.toISOString(),
+            expires_at: expiresAt,
+            updated_at: now.toISOString(),
+            cancelled_at: null,
+          },
+          { onConflict: "email" }
+        );
+
+      if (error) throw error;
+
+      const label = type === "lifetime" ? "Acesso Vitalício" : "1 Mês Grátis";
+      setResults((prev) => [
+        { event: label, plan, success: true, response: `Acesso concedido até ${new Date(expiresAt).toLocaleDateString("pt-BR")}` },
+        ...prev,
+      ]);
+
+      toast({
+        title: "Acesso concedido ✅",
+        description: `${label} ativado para ${email.trim().toLowerCase()}`,
+      });
+    } catch (err: any) {
+      setResults((prev) => [
+        { event: `grant-${type}`, plan: type, success: false, response: err.message || String(err) },
+        ...prev,
+      ]);
+      toast({ title: "Erro ao conceder acesso", description: String(err.message), variant: "destructive" });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const events: { event: TestEvent; label: string; color: string }[] = [
     { event: "paid", label: "Pagamento Aprovado", color: "bg-green-600 hover:bg-green-700" },
     { event: "refunded", label: "Reembolso", color: "bg-destructive hover:bg-destructive/90" },
