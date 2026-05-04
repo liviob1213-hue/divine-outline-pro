@@ -2,9 +2,9 @@ import { Moon, Sun, Bell, BellOff, LogOut } from "lucide-react";
 import logoPregai from "@/assets/logo-palavraai-new.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { useNotifications } from "@/hooks/use-notifications";
 import { useInAppNotifications } from "@/hooks/use-in-app-notifications";
 import { useToast } from "@/hooks/use-toast";
+import { promptPush, getPermission } from "@/lib/onesignal";
 import {
   Dialog,
   DialogContent,
@@ -25,9 +25,15 @@ export default function Header() {
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const { permission, enabled, requestPermission, disableNotifications } = useNotifications();
+  const [permission, setPermission] = useState<string>(() => getPermission());
+  const enabled = permission === "granted";
   const { notifications, unreadCount, markAllRead } = useInAppNotifications();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const id = setInterval(() => setPermission(getPermission()), 2000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("pregai_user_email");
@@ -66,8 +72,7 @@ export default function Header() {
 
   const handleToggleNotification = async () => {
     if (enabled) {
-      disableNotifications();
-      toast({ title: "Notificações desativadas", description: "Você não receberá mais o versículo diário." });
+      toast({ title: "Notificações já estão ativas", description: "Para desativar, use as configurações do navegador." });
       return;
     }
 
@@ -82,14 +87,16 @@ export default function Header() {
     }
 
     try {
-      const result = await requestPermission();
-      if (result === "granted") {
+      await promptPush();
+      setTimeout(() => {
+        const p = getPermission();
+        setPermission(p);
+        if (p === "granted") {
         toast({ title: "Notificações ativadas! 🔔", description: "Você receberá o versículo do dia às 8h." });
-      } else if (result === "denied") {
-        setShowPermissionDialog(true);
-      } else {
-        setShowPermissionDialog(true);
-      }
+        } else if (p === "denied") {
+          setShowPermissionDialog(true);
+        }
+      }, 800);
     } catch {
       setShowPermissionDialog(true);
     }
