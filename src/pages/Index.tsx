@@ -7,6 +7,7 @@ import ToolsGrid from "@/components/ToolsGrid";
 import BottomNav from "@/components/BottomNav";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import NotificationPrompt from "@/components/NotificationPrompt";
+import OneSignalButton from "@/components/OneSignalButton";
 import { getAllCachedHinosCount, cacheHinos } from "@/lib/offline-cache";
 
 const ALL_HINOS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-all-hinos`;
@@ -52,6 +53,9 @@ const Index = () => {
           <HeroSection />
           <VersiculoDoDia />
           <ContinueReading />
+          <div className="flex justify-center my-4">
+            <OneSignalButton />
+          </div>
         </div>
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
           {/* Main content */}
@@ -66,6 +70,9 @@ const Index = () => {
             <div className="lg:sticky lg:top-4">
               <VersiculoDoDia />
               <ContinueReading />
+              <div className="flex justify-center mt-4">
+                <OneSignalButton />
+              </div>
             </div>
           </div>
         </div>
