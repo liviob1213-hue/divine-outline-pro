@@ -24,15 +24,6 @@ verify_jwt = false
 [functions.kiwify-webhook]
 verify_jwt = false
 
-[functions.subscribe-push]
-verify_jwt = false
-
-[functions.send-daily-verse]
-verify_jwt = false
-
-[functions.get-vapid-key]
-verify_jwt = false
-
 [functions.get-onesignal-config]
 verify_jwt = false
 
