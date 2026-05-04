@@ -6,7 +6,6 @@ import ContinueReading from "@/components/ContinueReading";
 import ToolsGrid from "@/components/ToolsGrid";
 import BottomNav from "@/components/BottomNav";
 import AnimatedBackground from "@/components/AnimatedBackground";
-import NotificationPrompt from "@/components/NotificationPrompt";
 import OneSignalButton from "@/components/OneSignalButton";
 import { getAllCachedHinosCount, cacheHinos } from "@/lib/offline-cache";
 
@@ -78,7 +77,6 @@ const Index = () => {
         </div>
       </div>
       <BottomNav />
-      <NotificationPrompt />
     </div>
   );
 };
