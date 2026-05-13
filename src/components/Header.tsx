@@ -4,7 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useInAppNotifications } from "@/hooks/use-in-app-notifications";
 import { useToast } from "@/hooks/use-toast";
-import { promptPush, getPermission } from "@/lib/onesignal";
+import { promptPush, getPermission, getSubscriptionId } from "@/lib/onesignal";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -88,15 +89,21 @@ export default function Header() {
 
     try {
       await promptPush();
-      setTimeout(() => {
-        const p = getPermission();
-        setPermission(p);
-        if (p === "granted") {
-        toast({ title: "Notificações ativadas! 🔔", description: "Você receberá o versículo do dia às 8h." });
-        } else if (p === "denied") {
-          setShowPermissionDialog(true);
+      const subscriptionId = await getSubscriptionId();
+      const p = getPermission();
+      setPermission(p);
+      if (p === "granted") {
+        if (subscriptionId) {
+          try {
+            await supabase.functions.invoke("send-welcome-push", { body: { subscriptionId } });
+          } catch (e) {
+            console.error("[welcome-push] invoke error", e);
+          }
         }
-      }, 800);
+        toast({ title: "Notificações ativadas! 🔔", description: "Enviamos um push de confirmação." });
+      } else if (p === "denied") {
+        setShowPermissionDialog(true);
+      }
     } catch {
       setShowPermissionDialog(true);
     }

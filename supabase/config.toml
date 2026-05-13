@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.send-onesignal-verse]
 verify_jwt = false
+
+[functions.send-welcome-push]
+verify_jwt = false

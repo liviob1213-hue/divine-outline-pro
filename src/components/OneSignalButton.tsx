@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Bell, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { promptPush, getPermission } from "@/lib/onesignal";
+import { promptPush, getPermission, getSubscriptionId } from "@/lib/onesignal";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function OneSignalButton() {
   const [permission, setPermission] = useState<string>(() => getPermission());
@@ -20,13 +21,17 @@ export default function OneSignalButton() {
     setLoading(true);
     try {
       await promptPush();
-      setTimeout(() => {
-        const p = getPermission();
-        setPermission(p);
-        if (p === "granted") {
-          toast({ title: "Notificações ativadas! 🔔", description: "Você receberá o versículo do dia." });
+      const subscriptionId = await getSubscriptionId();
+      const p = getPermission();
+      setPermission(p);
+      if (p === "granted" && subscriptionId) {
+        try {
+          await supabase.functions.invoke("send-welcome-push", { body: { subscriptionId } });
+        } catch (e) {
+          console.error("[welcome-push] invoke error", e);
         }
-      }, 800);
+        toast({ title: "Notificações ativadas! 🔔", description: "Enviamos um push de confirmação." });
+      }
     } finally {
       setLoading(false);
     }
