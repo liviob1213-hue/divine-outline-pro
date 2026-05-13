@@ -57,6 +57,23 @@ export async function promptPush(): Promise<void> {
   }
 }
 
+export async function getSubscriptionId(timeoutMs = 8000): Promise<string | null> {
+  await initPromise;
+  const OS = window.OneSignal;
+  if (!OS) return null;
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const id = OS.User?.PushSubscription?.id;
+      if (id) return id as string;
+    } catch {
+      // ignore
+    }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  return null;
+}
+
 export function getPermission(): "granted" | "denied" | "default" | "unsupported" {
   if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
   return Notification.permission as any;
